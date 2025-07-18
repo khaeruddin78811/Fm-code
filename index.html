@@ -1,132 +1,165 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <title>کدنویس زنده</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>اژدهای زنده + ویرایشگر کد</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      font-family: 'Vazir', sans-serif;
-      background: linear-gradient(to bottom, #111, #222);
-      color: #fff;
+      font-family: 'Vazirmatn', sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    body.light {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .container {
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
     }
 
-    .editor {
-      background: #2a2a2a;
-      padding: 10px;
-      border-bottom: 2px solid #444;
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
     }
 
-    textarea {
-      width: 100%;
-      height: 200px;
-      background: #1e1e2e;
-      color: #00ffcc;
-      border: 2px solid #00ffcc;
-      border-radius: 10px;
-      padding: 15px;
-      font-size: 15px;
-      font-family: Consolas, monospace;
-      outline: none;
-      resize: vertical;
-    }
-
-    button {
-      margin-top: 10px;
-      background: #00ff88;
-      color: #000;
-      padding: 10px 20px;
+    .btn {
+      background: linear-gradient(to right, #06b6d4, #3b82f6);
+      color: white;
+      padding: 8px 16px;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
       cursor: pointer;
       transition: 0.3s;
     }
 
-    button:hover {
-      background: #00dd77;
+    .btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
     }
 
-    .output {
-      flex-grow: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      background: #000;
-    }
-
-    iframe {
+    .effect-box {
       width: 90%;
-      height: 80%;
-      max-height: 500px;
-      background: #fff;
-      border: 4px solid #00ff88;
+      max-width: 800px;
+      height: 300px;
+      border: 2px dashed #38bdf8;
       border-radius: 12px;
-      box-shadow: 0 0 20px #00ff88;
+      background: rgba(56, 189, 248, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    textarea {
+      width: 90%;
+      max-width: 800px;
+      height: 160px;
+      background: rgba(100,116,139,0.1);
+      color: inherit;
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid #64748b;
+      resize: vertical;
+      font-family: 'Vazirmatn', monospace;
+      font-size: 1rem;
+    }
+
+    select {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #94a3b8;
     }
   </style>
 </head>
-<body>
+<body class="dark">
+  <div class="container">
+    <div class="controls">
+      <button class="btn" onclick="runCode()">اجرای کد</button>
+      <button class="btn" onclick="saveCode()">ذخیره کد</button>
+      <button class="btn" onclick="copyCode()">📋 کپی</button>
+      <button class="btn" onclick="toggleTheme()">🌙/☀️ حالت</button>
 
-  <div class="editor">
-    <textarea id="code" placeholder="کدت را اینجا بنویس...">
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-  body { margin: 0; background: black; overflow: hidden; }
-  .heart {
-    position: absolute;
-    font-size: 25px;
-    color: red;
-    animation: fall 5s linear infinite;
-  }
-  @keyframes fall {
-    0% { transform: translateY(0) scale(1); opacity: 1; }
-    100% { transform: translateY(100vh) scale(1.5); opacity: 0; }
-  }
-</style>
-</head>
-<body>
-<script>
-  const emojis = ['❄️', '❤️', '🤍'];
-  for (let i = 0; i < 40; i++) {
-    const heart = document.createElement('div');
-    heart.className = 'heart';
-    heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    heart.style.left = Math.random() * 100 + 'vw';
-    heart.style.top = -10 + 'px';
-    heart.style.fontSize = (20 + Math.random() * 20) + 'px';
-    heart.style.animationDuration = (3 + Math.random() * 3) + 's';
-    document.body.appendChild(heart);
-  }
-</script>
-</body>
-</html>
-    </textarea>
-    <button onclick="runCode()">▶ اجرای کد</button>
-  </div>
+      <select onchange="loadPreset(this.value)">
+        <option value="">انتخاب کد آماده</option>
+        <option value="snowHeart">❄️ برف به قلب</option>
+        <option value="starSpin">🌟 ستاره چرخان</option>
+      </select>
+    </div>
 
-  <div class="output">
-    <iframe id="preview"></iframe>
+    <div class="effect-box" id="previewBox"></div>
+
+    <textarea id="codeInput" placeholder="کد HTML یا ایموجی‌ها را اینجا وارد کنید..."></textarea>
   </div>
 
   <script>
-    function runCode() {
-      const code = document.getElementById("code").value;
-      const iframe = document.getElementById("preview");
-      iframe.srcdoc = code;
-    }
-  </script>
+    const preview = document.getElementById('previewBox');
+    const input = document.getElementById('codeInput');
 
+    function runCode() {
+      preview.innerHTML = input.value;
+    }
+
+    function saveCode() {
+      localStorage.setItem("myCode", input.value);
+      alert("کد ذخیره شد!");
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(input.value).then(() => alert("کپی شد!"));
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle('dark');
+      body.classList.toggle('light');
+    }
+
+    function loadPreset(name) {
+      const presets = {
+        snowHeart: `
+          <style>
+            .snow { position: absolute; width: 10px; height: 10px; background: white; border-radius: 50%; animation: fall 4s linear infinite; }
+            @keyframes fall {
+              0% { transform: translateY(-20px) }
+              100% { transform: translateY(300px) scale(2); background: pink; border-radius: 50% }
+            }
+          </style>
+          ${Array.from({length: 50}).map(() => `<div class="snow" style="left:${Math.random()*100}%;"></div>`).join('')}
+          <div style="position:absolute;top:120px;left:40%;font-size:3rem;">❤️</div>
+        `,
+        starSpin: `
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+            <div style="font-size:4rem;animation:spin 3s linear infinite;">✨</div>
+          </div>
+          <style>
+            @keyframes spin { from{transform: rotate(0deg);} to{transform: rotate(360deg);} }
+          </style>
+        `
+      };
+      input.value = presets[name] || '';
+      runCode();
+    }
+
+    // Load saved code
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem("myCode");
+      if (saved) input.value = saved;
+    });
+  </script>
 </body>
 </html>
