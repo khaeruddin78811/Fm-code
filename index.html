@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <title>کدنویس زنده - افکت قلب برفی</title>
+  <meta charset="UTF-8">
+  <title>کدنویس زنده</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: #101010;
-      color: #fff;
       margin: 0;
-      font-family: sans-serif;
+      font-family: 'Vazir', sans-serif;
+      background: linear-gradient(to bottom, #111, #222);
+      color: #fff;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      overflow: hidden;
     }
 
     .editor {
+      background: #2a2a2a;
       padding: 10px;
-      background: #1e1e1e;
+      border-bottom: 2px solid #444;
     }
 
     textarea {
       width: 100%;
       height: 200px;
-      background: #222;
-      color: #00ff00;
-      font-family: monospace;
-      padding: 10px;
-      border: none;
+      background: #1e1e2e;
+      color: #00ffcc;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 15px;
+      font-family: Consolas, monospace;
       outline: none;
       resize: vertical;
-      font-size: 14px;
     }
 
     button {
@@ -39,10 +44,15 @@
       color: #000;
       padding: 10px 20px;
       border: none;
+      border-radius: 8px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      font-size: 16px;
-      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #00dd77;
     }
 
     .output {
@@ -50,51 +60,60 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 20px;
       background: #000;
     }
 
     iframe {
       width: 90%;
-      height: 90%;
-      border: 3px solid #00ff88;
+      height: 80%;
+      max-height: 500px;
+      background: #fff;
+      border: 4px solid #00ff88;
       border-radius: 12px;
-      background: #000;
+      box-shadow: 0 0 20px #00ff88;
     }
   </style>
 </head>
 <body>
 
   <div class="editor">
-    <textarea id="code" placeholder="کدت را اینجا وارد کن...">
-<!-- مثال: بارش برف با قلب -->
+    <textarea id="code" placeholder="کدت را اینجا بنویس...">
+<!DOCTYPE html>
+<html>
+<head>
 <style>
-  body { margin: 0; overflow: hidden; background: black; }
-  .snow {
+  body { margin: 0; background: black; overflow: hidden; }
+  .heart {
     position: absolute;
     font-size: 25px;
+    color: red;
     animation: fall 5s linear infinite;
   }
   @keyframes fall {
-    0% { transform: translateY(-5%) scale(1); opacity: 1; }
-    100% { transform: translateY(100vh) scale(2); opacity: 0; }
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(100vh) scale(1.5); opacity: 0; }
   }
 </style>
-
+</head>
+<body>
 <script>
-  const emojis = ['❄️','❄️','🤍','❤️'];
-  for (let i = 0; i < 50; i++) {
-    const snow = document.createElement('div');
-    snow.className = 'snow';
-    snow.style.left = Math.random() * 100 + 'vw';
-    snow.style.top = '-5%';
-    snow.style.color = 'white';
-    snow.style.animationDuration = 3 + Math.random() * 4 + 's';
-    snow.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    document.body.appendChild(snow);
+  const emojis = ['❄️', '❤️', '🤍'];
+  for (let i = 0; i < 40; i++) {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.top = -10 + 'px';
+    heart.style.fontSize = (20 + Math.random() * 20) + 'px';
+    heart.style.animationDuration = (3 + Math.random() * 3) + 's';
+    document.body.appendChild(heart);
   }
 </script>
+</body>
+</html>
     </textarea>
-    <button onclick="runCode()">اجرای کد</button>
+    <button onclick="runCode()">▶ اجرای کد</button>
   </div>
 
   <div class="output">
