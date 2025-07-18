@@ -1,27 +1,85 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fm-code - Fun Coding Projects</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>اژدهای D3 تعاملی</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+    }
+
+    svg {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <img src="assets/fc-logo.png" alt="Fm-code Logo" class="logo" />
-    <h1>Fm-code</h1>
-    <p>پروژه‌های سرگرم‌کننده با کدنویسی</p>
-  </header>
-  <main>
-    <div class="project-card">
-      <h2>🎯 Dragon Cursor Effect</h2>
-      <p>افکت موس دنباله‌دار با دم اژدها</p>
-      <a href="projects/dragon-cursor.html" class="btn">نمایش پروژه</a>
-    </div>
-  </main>
-  <footer>
-    <p>ساخته شده با ❤️ توسط Fm-code</p>
-  </footer>
+  <svg id="dragonCanvas"></svg>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    const svg = d3.select("#dragonCanvas");
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const head = { x: width / 2, y: height / 2 };
+    const tailLength = 10;
+    const segments = [];
+
+    // ساخت دُم با دایره‌های زنجیره‌ای
+    for (let i = 0; i < tailLength; i++) {
+      segments.push({ x: head.x, y: head.y });
+    }
+
+    // دایره سر
+    const headCircle = svg.append("circle")
+      .attr("cx", head.x)
+      .attr("cy", head.y)
+      .attr("r", 25)
+      .attr("fill", "#ff4444");
+
+    // دایره‌های دُم
+    const tailCircles = svg.selectAll(".tail")
+      .data(segments)
+      .enter()
+      .append("circle")
+      .attr("class", "tail")
+      .attr("r", 10)
+      .attr("fill", "#44ff88");
+
+    // دنبال کردن موس یا لمس
+    function update(event) {
+      const [x, y] = d3.pointer(event);
+
+      // به جلوترین نقطه اضافه کن
+      segments.unshift({ x, y });
+      segments.pop();
+
+      // به‌روزرسانی مکان سر
+      headCircle
+        .attr("cx", x)
+        .attr("cy", y);
+
+      // چرخاندن سر به سمت مسیر حرکت
+      const dx = segments[1].x - x;
+      const dy = segments[1].y - y;
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+      headCircle.attr("transform", `rotate(${angle}, ${x}, ${y})`);
+
+      // به‌روزرسانی دُم
+      tailCircles
+        .data(segments)
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+    }
+
+    svg.on("mousemove", update);
+    svg.on("touchmove", update);
+  </script>
 </body>
 </html>
