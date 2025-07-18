@@ -1,181 +1,177 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ادیتور و نمایشگر زنده</title>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap" rel="stylesheet">
+  <title>اجرای کد و نمایش افکت</title>
   <style>
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
+      transition: all 0.3s ease;
     }
     body {
+      margin: 0;
+      padding: 0;
       font-family: 'Vazirmatn', sans-serif;
-      background: #f0f4f8;
-      color: #0f172a;
+      background: #0f172a;
+      color: white;
+    }
+    .container {
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      padding: 10px;
-      transition: background 0.3s, color 0.3s;
+      height: 100vh;
     }
-    .toolbar {
+
+    .top-bar {
       display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #1e293b;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
-    .btn {
-      padding: 10px 16px;
-      background: linear-gradient(to right, #0ea5e9, #3b82f6);
+    .top-bar button {
+      margin: 0 5px;
+      background: linear-gradient(to bottom, #3b82f6, #2563eb);
       border: none;
       color: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      padding: 10px 20px;
+      border-radius: 10px;
       cursor: pointer;
       font-weight: bold;
-      transition: transform 0.2s, background 0.3s;
+      box-shadow: 0 4px 0 #1d4ed8;
     }
-    .btn:hover {
+    .top-bar button:hover {
       transform: scale(1.05);
-      background: linear-gradient(to right, #0284c7, #2563eb);
+    }
+
+    .editor {
+      padding: 10px;
+      background: #334155;
     }
     textarea {
       width: 100%;
-      height: 250px;
+      height: 200px;
       padding: 15px;
       font-size: 1rem;
-      background: #ffffff;
-      border: 2px solid #94a3b8;
+      border: none;
       border-radius: 12px;
+      background: #1e293b;
+      color: #f8fafc;
       resize: vertical;
-      margin-bottom: 10px;
       direction: ltr;
       font-family: monospace;
     }
-    .output-box {
+
+    .output {
       flex: 1;
-      background: #ffffff;
-      border: 3px dashed #0ea5e9;
-      border-radius: 20px;
-      padding: 20px;
-      min-height: 300px;
+      background: #f1f5f9;
+      color: #000;
       overflow: auto;
-      margin-top: 10px;
+      padding: 20px;
+      border-top: 3px solid #38bdf8;
     }
-    .dark-mode {
+
+    .dark-mode .output {
       background: #0f172a;
-      color: #e2e8f0;
+      color: #f8fafc;
     }
-    .dark-mode textarea {
-      background: #1e293b;
-      color: #e2e8f0;
-      border-color: #475569;
-    }
-    .dark-mode .output-box {
-      background: #1e293b;
+    .dark-mode body {
+      background: #0f172a;
       color: white;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
     }
   </style>
 </head>
-<body>
+<body class="dark-mode">
+  <div class="container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="buttons">
+        <button onclick="runCode()">اجرای کد</button>
+        <button onclick="copyCode()">📋 کپی</button>
+        <button onclick="saveCode()">💾 ذخیره</button>
+        <button onclick="insertTemplate()">🌟 کد آماده</button>
+      </div>
+      <button onclick="toggleTheme()">🌗 روز / شب</button>
+    </div>
 
-  <div class="toolbar">
-    <button class="btn" onclick="runCode()">اجرای کد</button>
-    <button class="btn" onclick="saveCode()">💾 ذخیره</button>
-    <button class="btn" onclick="toggleTheme()">🌗 حالت شب/روشن</button>
-    <button class="btn" onclick="copyCode()">📋 کپی کد</button>
-    <button class="btn" onclick="loadSample()">🌨 کد برف به قلب</button>
+    <!-- Code Editor -->
+    <div class="editor">
+      <textarea id="codeInput" placeholder="کد HTML یا JavaScript خود را بنویسید..."></textarea>
+    </div>
+
+    <!-- Output Box -->
+    <div class="output" id="outputBox">
+      👇 خروجی کد شما اینجا ظاهر می‌شود
+    </div>
   </div>
 
-  <textarea id="codeInput" placeholder="کد خود را اینجا بنویسید..."></textarea>
-
-  <div class="output-box" id="output"></div>
-
+  <!-- Scripts -->
   <script>
     function runCode() {
-      const output = document.getElementById("output");
       const code = document.getElementById("codeInput").value;
-      output.innerHTML = "";
-      try {
-        const iframe = document.createElement("iframe");
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
-        iframe.style.border = "none";
-        iframe.srcdoc = code;
-        output.appendChild(iframe);
-      } catch (e) {
-        output.textContent = "خطا در اجرای کد: " + e.message;
-      }
+      const iframe = document.createElement("iframe");
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.style.border = "none";
+      iframe.srcdoc = code;
+      const outputBox = document.getElementById("outputBox");
+      outputBox.innerHTML = '';
+      outputBox.appendChild(iframe);
+    }
+
+    function copyCode() {
+      const code = document.getElementById("codeInput").value;
+      navigator.clipboard.writeText(code).then(() => {
+        alert("کد کپی شد!");
+      });
     }
 
     function saveCode() {
       const code = document.getElementById("codeInput").value;
-      localStorage.setItem("mySavedCode", code);
-      alert("✅ کد ذخیره شد!");
-    }
-
-    function loadSample() {
-      const sample = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      overflow: hidden;
-    }
-    .snowflake {
-      position: absolute;
-      color: white;
-      animation: fall 5s linear infinite;
-    }
-    @keyframes fall {
-      0% { transform: translateY(-100px); }
-      100% { transform: translateY(100vh); }
-    }
-  </style>
-</head>
-<body>
-  <script>
-    const emojis = ["❄", "❄", "❄", "💖"];
-    setInterval(() => {
-      const flake = document.createElement('div');
-      flake.className = 'snowflake';
-      flake.innerText = emojis[Math.floor(Math.random()*emojis.length)];
-      flake.style.left = Math.random() * window.innerWidth + 'px';
-      flake.style.fontSize = (Math.random()*20 + 10) + 'px';
-      flake.style.top = '-50px';
-      document.body.appendChild(flake);
-      setTimeout(() => flake.remove(), 5000);
-    }, 300);
-  </script>
-</body>
-</html>`;
-      document.getElementById("codeInput").value = sample;
-      runCode();
+      const blob = new Blob([code], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "mycode.html";
+      a.click();
     }
 
     function toggleTheme() {
       document.body.classList.toggle("dark-mode");
     }
 
-    function copyCode() {
-      const code = document.getElementById("codeInput");
-      code.select();
-      document.execCommand("copy");
-      alert("📋 کد کپی شد!");
+    function insertTemplate() {
+      document.getElementById("codeInput").value = `
+<!-- برف تبدیل به قلب -->
+<style>
+  .flake {
+    position: absolute;
+    font-size: 2rem;
+    animation: fall 5s linear infinite;
+  }
+  @keyframes fall {
+    0% { top: -10%; opacity: 0; }
+    100% { top: 90%; opacity: 1; transform: rotate(360deg); }
+  }
+</style>
+<div id="snow"></div>
+<script>
+  const snow = document.getElementById("snow");
+  setInterval(() => {
+    const flake = document.createElement("div");
+    flake.className = "flake";
+    flake.textContent = "❤️";
+    flake.style.left = Math.random() * 100 + "vw";
+    snow.appendChild(flake);
+    setTimeout(() => flake.remove(), 5000);
+  }, 300);
+</script>`;
     }
-
-    // بارگذاری خودکار کد ذخیره‌شده
-    window.onload = () => {
-      const saved = localStorage.getItem("mySavedCode");
-      if (saved) document.getElementById("codeInput").value = saved;
-    };
   </script>
 </body>
 </html>
