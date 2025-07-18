@@ -10,21 +10,24 @@
       background: #0f172a;
       color: white;
       font-family: 'Vazirmatn', sans-serif;
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
     }
+
     .effect-box {
-      width: 400px;
-      height: 400px;
+      width: 95vw;
+      height: 60vh;
       border: 2px dashed #38bdf8;
       border-radius: 12px;
+      margin-top: 20px;
       position: relative;
       overflow: hidden;
       background: #1e293b;
     }
+
     .cursor-dot {
       position: absolute;
       width: 8px;
@@ -34,12 +37,35 @@
       pointer-events: none;
       animation: fadeOut 0.8s forwards;
     }
+
     @keyframes fadeOut {
       0% { opacity: 1; transform: scale(1); }
       100% { opacity: 0; transform: scale(0.5); }
     }
+
+    .arrow-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 20px;
+    }
+
+    .arrow-buttons button {
+      background-color: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .arrow-buttons button:hover {
+      background-color: #0ea5e9;
+    }
+
     .guide-text {
-      margin-top: 20px;
+      margin-top: 15px;
       font-size: 0.95rem;
       color: #94a3b8;
       text-align: center;
@@ -48,23 +74,8 @@
   </style>
 </head>
 <body>
-  <div class="effect-box" id="effectBox"></div>
-  <div class="guide-text">
-    🐉 نشان‌گر موس را در مربع حرکت دهید تا افکت دنباله دم اژدها را ببینید.<br/>
-    این پروژه با HTML, CSS, JavaScript ساخته شده است.
-  </div>
 
-  <script>
-    const box = document.getElementById('effectBox');
-    box.addEventListener('mousemove', (e) => {
-      const dot = document.createElement('div');
-      dot.classList.add('cursor-dot');
-      const rect = box.getBoundingClientRect();
-      dot.style.left = `${e.clientX - rect.left}px`;
-      dot.style.top = `${e.clientY - rect.top}px`;
-      box.appendChild(dot);
-      setTimeout(() => dot.remove(), 800);
-    });
-  </script>
-</body>
-</html>
+  <div class="effect-box" id="effectBox"></div>
+
+  <div class="arrow-buttons">
+    <button onclick="alert('⬆
