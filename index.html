@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>افکت دم اژدها</title>
-  <link rel="stylesheet" href="../style.css" />
   <style>
     body {
       background: #0f172a;
@@ -18,11 +17,11 @@
     }
 
     .effect-box {
-      width: 95vw;
-      height: 60vh;
-      border: 2px dashed #38bdf8;
-      border-radius: 12px;
+      width: 90vw;
+      height: 50vh;
       margin-top: 20px;
+      border: 3px dashed #38bdf8;
+      border-radius: 16px;
       position: relative;
       overflow: hidden;
       background: #1e293b;
@@ -30,8 +29,8 @@
 
     .cursor-dot {
       position: absolute;
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       background: #38bdf8;
       border-radius: 50%;
       pointer-events: none;
@@ -43,39 +42,85 @@
       100% { opacity: 0; transform: scale(0.5); }
     }
 
-    .arrow-buttons {
-      margin-top: 10px;
-      display: flex;
-      gap: 20px;
-    }
-
-    .arrow-buttons button {
-      background-color: #38bdf8;
-      color: #0f172a;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1.2rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .arrow-buttons button:hover {
-      background-color: #0ea5e9;
-    }
-
     .guide-text {
-      margin-top: 15px;
-      font-size: 0.95rem;
+      margin: 20px;
+      font-size: 0.9rem;
       color: #94a3b8;
       text-align: center;
       max-width: 500px;
+    }
+
+    .arrows {
+      display: flex;
+      justify-content: space-between;
+      width: 90vw;
+      margin-top: 10px;
+      padding: 0 20px;
+    }
+
+    .arrow-btn {
+      background: #38bdf8;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: #0f172a;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .arrow-btn:hover {
+      background: #0ea5e9;
+    }
+
+    @media (max-width: 480px) {
+      .arrow-btn {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- فلش بالا -->
+  <div class="arrows">
+    <button class="arrow-btn">⬅ برگشت</button>
+    <button class="arrow-btn">⬆ بالا</button>
+  </div>
+
+  <!-- جعبه افکت -->
   <div class="effect-box" id="effectBox"></div>
 
-  <div class="arrow-buttons">
-    <button onclick="alert('⬆
+  <!-- متن راهنما -->
+  <div class="guide-text">
+    🐉 با لمس یا حرکت نشان‌گر در این ناحیه، دنباله‌ی دم اژدها را ببینید.
+  </div>
+
+  <script>
+    const box = document.getElementById('effectBox');
+    box.addEventListener('mousemove', (e) => {
+      const dot = document.createElement('div');
+      dot.classList.add('cursor-dot');
+      const rect = box.getBoundingClientRect();
+      dot.style.left = `${e.clientX - rect.left}px`;
+      dot.style.top = `${e.clientY - rect.top}px`;
+      box.appendChild(dot);
+      setTimeout(() => dot.remove(), 800);
+    });
+
+    // برای لمس موبایل
+    box.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0];
+      const dot = document.createElement('div');
+      dot.classList.add('cursor-dot');
+      const rect = box.getBoundingClientRect();
+      dot.style.left = `${touch.clientX - rect.left}px`;
+      dot.style.top = `${touch.clientY - rect.top}px`;
+      box.appendChild(dot);
+      setTimeout(() => dot.remove(), 800);
+    });
+  </script>
+
+</body>
+</html>
