@@ -1,85 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>اژدهای D3 تعاملی</title>
+  <title>اژدهای زنده با D3.js</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
       background-color: #000;
+      overflow: hidden;
     }
-
     svg {
       width: 100vw;
       height: 100vh;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <svg id="dragonCanvas"></svg>
+  <svg id="canvas"></svg>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
-    const svg = d3.select("#dragonCanvas");
-
+    const svg = d3.select("#canvas");
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const head = { x: width / 2, y: height / 2 };
-    const tailLength = 10;
+    const segmentCount = 25; // تعداد دایره‌های دم
+    const segmentSize = 16;
     const segments = [];
 
-    // ساخت دُم با دایره‌های زنجیره‌ای
-    for (let i = 0; i < tailLength; i++) {
-      segments.push({ x: head.x, y: head.y });
+    // موقعیت اولیه همه‌ی دایره‌ها وسط صفحه
+    for (let i = 0; i < segmentCount; i++) {
+      segments.push({ x: width / 2, y: height / 2 });
     }
 
-    // دایره سر
-    const headCircle = svg.append("circle")
-      .attr("cx", head.x)
-      .attr("cy", head.y)
-      .attr("r", 25)
-      .attr("fill", "#ff4444");
+    // سر اژدها (دایره اصلی)
+    const head = svg.append("circle")
+      .attr("r", segmentSize)
+      .attr("fill", "#ff3333");
 
-    // دایره‌های دُم
-    const tailCircles = svg.selectAll(".tail")
-      .data(segments)
+    // دُم اژدها (دایره‌های دنباله)
+    const tail = svg.selectAll(".segment")
+      .data(segments.slice(1)) // سر جدا است
       .enter()
       .append("circle")
-      .attr("class", "tail")
-      .attr("r", 10)
-      .attr("fill", "#44ff88");
+      .attr("class", "segment")
+      .attr("r", 8)
+      .attr("fill", "#33ff77");
 
-    // دنبال کردن موس یا لمس
-    function update(event) {
+    function updatePosition(event) {
       const [x, y] = d3.pointer(event);
 
-      // به جلوترین نقطه اضافه کن
+      // جای جدید را به ابتدای لیست اضافه می‌کنیم
       segments.unshift({ x, y });
       segments.pop();
 
-      // به‌روزرسانی مکان سر
-      headCircle
-        .attr("cx", x)
-        .attr("cy", y);
+      // حرکت سر
+      head.attr("cx", segments[0].x)
+          .attr("cy", segments[0].y);
 
-      // چرخاندن سر به سمت مسیر حرکت
-      const dx = segments[1].x - x;
-      const dy = segments[1].y - y;
+      // چرخش سر به‌سمت حرکت
+      const dx = segments[1].x - segments[0].x;
+      const dy = segments[1].y - segments[0].y;
       const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      head.attr("transform", `rotate(${angle}, ${segments[0].x}, ${segments[0].y})`);
 
-      headCircle.attr("transform", `rotate(${angle}, ${x}, ${y})`);
-
-      // به‌روزرسانی دُم
-      tailCircles
-        .data(segments)
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y);
+      // حرکت دم
+      tail.data(segments.slice(1))
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
     }
 
-    svg.on("mousemove", update);
-    svg.on("touchmove", update);
+    svg.on("mousemove", updatePosition);
+    svg.on("touchmove", updatePosition);
   </script>
 </body>
 </html>
