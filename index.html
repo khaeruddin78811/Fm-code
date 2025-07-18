@@ -1,126 +1,74 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>افکت دم اژدها</title>
+  <meta charset="utf-8" />
+  <title>اژدهای تعقیب‌کننده</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
-      background: #0f172a;
-      color: white;
-      font-family: 'Vazirmatn', sans-serif;
       margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .effect-box {
-      width: 90vw;
-      height: 50vh;
-      margin-top: 20px;
-      border: 3px dashed #38bdf8;
-      border-radius: 16px;
-      position: relative;
       overflow: hidden;
-      background: #1e293b;
+      background: #000;
     }
 
-    .cursor-dot {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #38bdf8;
-      border-radius: 50%;
-      pointer-events: none;
-      animation: fadeOut 0.8s forwards;
+    svg {
+      width: 100vw;
+      height: 100vh;
     }
 
-    @keyframes fadeOut {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.5); }
-    }
-
-    .guide-text {
-      margin: 20px;
-      font-size: 0.9rem;
-      color: #94a3b8;
-      text-align: center;
-      max-width: 500px;
-    }
-
-    .arrows {
-      display: flex;
-      justify-content: space-between;
-      width: 90vw;
-      margin-top: 10px;
-      padding: 0 20px;
-    }
-
-    .arrow-btn {
-      background: #38bdf8;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      color: #0f172a;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .arrow-btn:hover {
-      background: #0ea5e9;
-    }
-
-    @media (max-width: 480px) {
-      .arrow-btn {
-        padding: 8px 14px;
-        font-size: 0.9rem;
-      }
+    .dragon-part {
+      fill: limegreen;
+      stroke: #00ff00;
+      stroke-width: 2;
     }
   </style>
 </head>
 <body>
-
-  <!-- فلش بالا -->
-  <div class="arrows">
-    <button class="arrow-btn">⬅ برگشت</button>
-    <button class="arrow-btn">⬆ بالا</button>
-  </div>
-
-  <!-- جعبه افکت -->
-  <div class="effect-box" id="effectBox"></div>
-
-  <!-- متن راهنما -->
-  <div class="guide-text">
-    🐉 با لمس یا حرکت نشان‌گر در این ناحیه، دنباله‌ی دم اژدها را ببینید.
-  </div>
+  <svg></svg>
 
   <script>
-    const box = document.getElementById('effectBox');
-    box.addEventListener('mousemove', (e) => {
-      const dot = document.createElement('div');
-      dot.classList.add('cursor-dot');
-      const rect = box.getBoundingClientRect();
-      dot.style.left = `${e.clientX - rect.left}px`;
-      dot.style.top = `${e.clientY - rect.top}px`;
-      box.appendChild(dot);
-      setTimeout(() => dot.remove(), 800);
+    const svg = d3.select("svg");
+    const numParts = 20; // تعداد بخش‌های بدن اژدها
+    const parts = [];
+
+    // نقاط اولیه
+    for (let i = 0; i < numParts; i++) {
+      parts.push({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    }
+
+    // رسم دایره‌های بدن اژدها
+    const circles = svg.selectAll("circle")
+      .data(parts)
+      .enter()
+      .append("circle")
+      .attr("r", (d, i) => 20 - i * 0.7) // کوچکتر شدن از سر تا دم
+      .attr("class", "dragon-part");
+
+    let target = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    // حرکت دادن کل اژدها دنبال موس یا لمس
+    svg.on("mousemove touchmove", function (event) {
+      const pos = d3.pointer(event);
+      target.x = pos[0];
+      target.y = pos[1];
     });
 
-    // برای لمس موبایل
-    box.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      const dot = document.createElement('div');
-      dot.classList.add('cursor-dot');
-      const rect = box.getBoundingClientRect();
-      dot.style.left = `${touch.clientX - rect.left}px`;
-      dot.style.top = `${touch.clientY - rect.top}px`;
-      box.appendChild(dot);
-      setTimeout(() => dot.remove(), 800);
+    d3.timer(function () {
+      // برای هر بخش، به سمت بخش قبلی حرکت کند
+      for (let i = parts.length - 1; i > 0; i--) {
+        parts[i].x += (parts[i - 1].x - parts[i].x) * 0.15;
+        parts[i].y += (parts[i - 1].y - parts[i].y) * 0.15;
+      }
+
+      // سر به سمت هدف حرکت کند
+      parts[0].x += (target.x - parts[0].x) * 0.2;
+      parts[0].y += (target.y - parts[0].y) * 0.2;
+
+      // به‌روزرسانی مکان دایره‌ها
+      circles
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
     });
   </script>
-
 </body>
 </html>
