@@ -1,157 +1,114 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code Simulator</title>
+  <meta charset="UTF-8">
+  <title>شبیه CodePen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css" rel="stylesheet" />
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: monospace;
-      background-color: #1e1e1e;
-      color: #ccc;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background-color: #111;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    }
-    header h1 {
-      color: #61dafb;
-      font-size: 1.2rem;
-    }
-    nav button {
-      margin-left: 10px;
-      background: #333;
-      border: none;
-      color: #61dafb;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .editor-container {
-      flex: 1;
-      display: flex;
-      flex-direction: row;
-    }
-    .editor {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background-color: #1e1e1e;
-      border-right: 1px solid #444;
-    }
-    .editor label {
-      background-color: #333;
-      padding: 6px;
-      color: #fff;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #444;
-    }
-    .editor textarea {
-      flex: 1;
-      background-color: #1e1e1e;
-      color: #ccc;
-      border: none;
-      padding: 10px;
-      font-family: monospace;
-      resize: none;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    .output-container {
-      height: 200px;
-      border-top: 2px solid #444;
-      display: flex;
-      flex-direction: column;
-    }
-    .output {
-      flex: 1;
-      background: #000;
-      color: #0f0;
-      padding: 10px;
-      font-family: monospace;
-      overflow-y: auto;
-    }
-    .buttons {
-      padding: 10px;
-      background-color: #222;
-      text-align: center;
-    }
-    .buttons button {
-      background: #0f62fe;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
+    body, html { margin:0; padding:0; height:100%; font-family:sans-serif; direction:rtl; }
+    .topbar { height:50px; background:#252526; display:flex; align-items:center; justify-content:space-between; padding:0 15px; color:#eee; }
+    .topbar select, .topbar button, .topbar input { margin:0 5px; padding:6px; border-radius:6px; border:none; background:#3A3D41; color:white; }
+    .main { display:flex; height:calc(100% - 50px); }
+    .panel { flex:1; display:flex; flex-direction:column; }
+    #editorHtml, #editorCss, #editorJs { height:33.33%; border-bottom:1px solid #444; }
+    .preview { flex:1; background:#fff; }
+    iframe { width:100%; height:100%; border:none; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Code Simulator</h1>
-    <nav>
-      <button>About</button>
-      <button>Support</button>
-      <button>Upload</button>
-      <button>Download</button>
-    </nav>
-  </header>  <div class="container">
-    <div class="editor-container">
-      <div class="editor">
-        <label for="html">HTML</label>
-        <textarea id="html" placeholder="Write HTML here..."></textarea>
-      </div>
-      <div class="editor">
-        <label for="css">CSS</label>
-        <textarea id="css" placeholder="Write CSS here..."></textarea>
-      </div>
-      <div class="editor">
-        <label for="js">JavaScript</label>
-        <textarea id="js" placeholder="Write JavaScript here..."></textarea>
-      </div>
-    </div>
-    <div class="buttons">
-      <button onclick="runCode()">Run Code</button>
-    </div>
-    <div class="output-container">
-      <div class="output" id="output"></div>
-    </div>
-  </div>  <script>
-    function runCode() {
-      const html = document.getElementById("html").value;
-      const css = `<style>${document.getElementById("css").value}</style>`;const js = `<script>${document.getElementById("js").value}<\/script>`;
-  const result = html + css + js;
-  const output = document.getElementById("output");
-  const iframe = document.createElement("iframe");
-  iframe.style.width = "100%";
-  iframe.style.height = "100%";
-  iframe.style.border = "none";
-  output.innerHTML = "";
-  output.appendChild(iframe);
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(result);
-  doc.close();
-}
 
+  <div class="topbar">
+    <div>
+      <button onclick="runAll()">▶ اجرا</button>
+      <button onclick="saveCode()">💾 ذخیره</button>
+      <input type="file" onchange="loadFile(event)">
+    </div>
+    <div>
+      <select id="themeSel">
+        <option value="vs-dark">تاریک</option>
+        <option value="vs">روشن</option>
+      </select>
+      <select id="langMode">
+        <option value="html">HTML/CSS/JS</option>
+        <option value="javascript">JavaScript</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="panel">
+      <div id="editorHtml"></div>
+      <div id="editorCss"></div>
+      <div id="editorJs"></div>
+    </div>
+    <div class="panel preview">
+      <iframe id="frame"></iframe>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.js"></script>
+  <script>
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
+    require(['vs/editor/editor.main'], () => {
+      window.htmlEditor = monaco.editor.create(document.getElementById('editorHtml'), {
+        language: 'html', theme: 'vs-dark', automaticLayout:true, minimap:{enabled:false}
+      });
+      window.cssEditor = monaco.editor.create(document.getElementById('editorCss'), {
+        language: 'css', theme: 'vs-dark', automaticLayout:true, minimap:{enabled:false}
+      });
+      window.jsEditor = monaco.editor.create(document.getElementById('editorJs'), {
+        language: 'javascript', theme: 'vs-dark', automaticLayout:true, minimap:{enabled:false}
+      });
+
+      document.getElementById('themeSel').onchange = e => {
+        monaco.editor.setTheme(e.target.value);
+      };
+      document.getElementById('langMode').onchange = e => {
+        const lang = e.target.value;
+        htmlEditor.updateOptions({ readOnly: lang !== 'html' });
+        cssEditor.updateOptions({ readOnly: lang !== 'html' });
+        jsEditor.updateOptions({ readOnly: lang === 'html' ? false : (lang === 'javascript') });
+      };
+
+      window.runAll = () => {
+        const html = htmlEditor.getValue();
+        const css = `<style>${cssEditor.getValue()}</style>`;
+        const js = `<script>${jsEditor.getValue()}<\/script>`;
+        document.getElementById('frame').srcdoc = html + css + js;
+      };
+
+      window.saveCode = () => {
+        const data = {
+          html: htmlEditor.getValue(),
+          css: cssEditor.getValue(),
+          js: jsEditor.getValue()
+        };
+        localStorage.setItem('myCodePen', JSON.stringify(data));
+        alert('ذخیره‌شد!');
+      };
+
+      const loaded = localStorage.getItem('myCodePen');
+      if (loaded) {
+        const d = JSON.parse(loaded);
+        htmlEditor.setValue(d.html);
+        cssEditor.setValue(d.css);
+        jsEditor.setValue(d.js);
+      }
+    });
+
+    function loadFile(e) {
+      const file = e.target.files[0];
+      const ext = file.name.split('.').pop();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const txt = reader.result;
+        if (ext === 'html') htmlEditor.setValue(txt);
+        if (ext === 'css') cssEditor.setValue(txt);
+        if (ext === 'js') jsEditor.setValue(txt);
+      };
+      reader.readAsText(file);
+    }
   </script>
 </body>
 </html>
