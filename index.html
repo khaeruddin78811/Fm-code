@@ -1,169 +1,38 @@
-<!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code Simulator</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Courier New', monospace;
-      background-color: #1e1e1e;
-      color: #d4d4d4;
-    }
-    header {
-      background-color: #333;
-      padding: 0.5rem 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #555;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.2rem;
-    }
-    nav {
-      display: flex;
-      gap: 10px;
-    }
-    nav button {
-      background-color: #444;
-      border: none;
-      color: white;
-      padding: 0.4rem 0.8rem;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .container {
-      display: flex;
-      height: calc(100vh - 60px);
-    }
-    .editor, .output {
-      flex: 1;
-      padding: 1rem;
-      box-sizing: border-box;
-    }
-    .editor {
-      background-color: #1e1e1e;
-      box-shadow: inset 0 0 10px #000;
-      border-right: 2px solid #555;
-    }
-    .output {
-      background-color: #121212;
-      box-shadow: inset 0 0 10px #000;
-    }
-    textarea {
-      width: 100%;
-      height: 90%;
-      background: #1e1e1e;
-      color: #d4d4d4;
-      font-family: monospace;
-      font-size: 1rem;
-      border: none;
-      outline: none;
-      resize: none;
-      line-height: 1.4;
-    }
-    .line-numbers {
-      float: left;
-      text-align: right;
-      margin-right: 10px;
-      user-select: none;
-      color: #888;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      background: white;
-      border: none;
-    }
-    .run-btn {
-      margin-top: 10px;
-      background-color: #007acc;
-      color: white;
-      padding: 0.4rem 1rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .drawer-menu {
-      position: fixed;
-      top: 60px;
-      left: 0;
-      width: 200px;
-      height: calc(100vh - 60px);
-      background-color: #222;
-      padding: 1rem;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      box-shadow: 2px 0 10px #000;
-    }
-    .drawer-menu.open {
-      display: flex;
-    }
-    .syntax-highlight span.keyword {
-      color: #569CD6;
-    }
-    .syntax-highlight span.string {
-      color: #D69D85;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Code Simulator</h1>
-    <nav>
-      <button onclick="toggleDrawer()">☰ منو</button>
-      <button>درباره ما</button>
-      <button>راهنما</button>
-      <button>دانلود</button>
-      <button>آپلود</button>
-      <button>پشتیبانی</button>
-    </nav>
-  </header>
-  <div class="drawer-menu" id="drawer">
-    <strong>اطلاعات بیشتر:</strong>
-    <p>این یک شبیه‌ساز ساده با زبان‌های مختلف است.</p>
-    <p>پشتیبانی از Python، HTML، CSS، JS</p>
-    <p>تم گرافیکی قابل شخصی‌سازی</p>
-  </div>
-  <div class="container">
-    <div class="editor">
-      <div class="line-numbers" id="lines"></div>
-      <textarea id="code" oninput="updateLineNumbers(); highlightCode();">print("Hello, World!")</textarea>
-      <button class="run-btn" onclick="runCode()">▶ اجرا</button>
-    </div>
-    <div class="output">
-      <iframe id="display"></iframe>
-    </div>
-  </div>  <script>
-    const code = document.getElementById("code");
-    const lines = document.getElementById("lines");
-    const drawer = document.getElementById("drawer");
+// ✅ نسخه ارتقاء یافته محیط شبیه‌سازی برنامه‌نویسی
 
-    function updateLineNumbers() {
-      const count = code.value.split("\n").length;
-      lines.innerHTML = Array.from({ length: count }, (_, i) => (i + 1)).join("<br>");
-    }
+import React, { useState } from 'react'; import { Tabs, Tab } from '@/components/ui/tabs'; import { Button } from '@/components/ui/button'; import { Textarea } from '@/components/ui/textarea'; import { Input } from '@/components/ui/input'; import { Card, CardContent } from '@/components/ui/card'; import { ScrollArea } from '@/components/ui/scroll-area'; import { Download, UploadCloud, PlayCircle, Menu } from 'lucide-react'; import { motion } from 'framer-motion';
 
-    function toggleDrawer() {
-      drawer.classList.toggle("open");
-    }
+export default function CodePlayground() { const [html, setHtml] = useState('<h1>Hello</h1>'); const [css, setCss] = useState('h1 { color: red; }'); const [js, setJs] = useState('console.log("hello")'); const [output, setOutput] = useState(''); const [menuOpen, setMenuOpen] = useState(false);
 
-    function runCode() {
-      const content = code.value;
-      const display = document.getElementById("display");
-      display.srcdoc = content.includes("<html") ? content : `<pre>${content}</pre>`;}
+const runCode = () => { const code =  <html> <head> <style>${css}</style> </head> <body> ${html} <script>${js}<\/script> </body> </html>; setOutput(code); };
 
-function highlightCode() {
-  let highlighted = code.value
-    .replace(/(function|var|let|const|print)/g, '<span class="keyword">$1</span>')
-    .replace(/(".*?"|\'.*?\')/g, '<span class="string">$1</span>');
-}
+return ( <div className="bg-gradient-to-br from-slate-900 to-black min-h-screen text-white p-2"> <div className="flex justify-between items-center mb-2"> <div className="flex gap-2 items-center"> <Button variant="ghost" size="icon" onClick={() => setMenuOpen(!menuOpen)}> <Menu /> </Button> {menuOpen && ( <div className="absolute top-12 left-2 bg-slate-800 rounded-xl shadow-lg p-4 text-sm w-64 z-50"> <p className="mb-2 font-bold">منو</p> <ul className="space-y-1"> <li>درباره ما</li> <li>راهنما</li> <li>تماس با ما</li> <li>تنظیمات شخصی‌سازی</li> <li>آپلود پروژه</li> <li>دانلود پروژه</li> </ul> </div> )} </div> <Button onClick={runCode} className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-1"> <PlayCircle size={18} /> اجرا کن </Button> </div>
 
-updateLineNumbers();
+<Tabs defaultValue="html" className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+    <Tab value="html" label="HTML">
+      <Textarea rows={15} value={html} onChange={(e) => setHtml(e.target.value)} className="bg-slate-800 font-mono text-xs border-l-4 border-red-500 shadow-inner" placeholder="کد HTML..." />
+    </Tab>
+    <Tab value="css" label="CSS">
+      <Textarea rows={15} value={css} onChange={(e) => setCss(e.target.value)} className="bg-slate-800 font-mono text-xs border-l-4 border-blue-500 shadow-inner" placeholder="کد CSS..." />
+    </Tab>
+    <Tab value="js" label="JavaScript">
+      <Textarea rows={15} value={js} onChange={(e) => setJs(e.target.value)} className="bg-slate-800 font-mono text-xs border-l-4 border-yellow-500 shadow-inner" placeholder="کد JS..." />
+    </Tab>
+  </Tabs>
 
-  </script>
-</body>
-</html>
+  <Card className="rounded-2xl mt-4 overflow-hidden shadow-2xl border border-slate-700" style={{ height: '45vh' }}>
+    <CardContent className="bg-black h-full">
+      <iframe
+        title="output"
+        srcDoc={output}
+        sandbox="allow-scripts"
+        frameBorder="0"
+        className="w-full h-full"
+      />
+    </CardContent>
+  </Card>
+</div>
+
+); }
+
+  
