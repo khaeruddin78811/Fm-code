@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>شبیه‌ساز کدنویسی</title>
+  <title>شبیه‌ساز کدنویسی پیشرفته</title>
   <style>
     body {
       margin: 0;
@@ -12,36 +12,6 @@
       height: 100vh;
       background: #1e1e1e;
       color: white;
-    }
-    .simulator {
-      flex: 1;
-      background: #2b2b2b;
-      padding: 1rem;
-      overflow: auto;
-      border-bottom: 2px solid #444;
-    }
-    .editor {
-      flex: 1;
-      background: #121212;
-      display: flex;
-      flex-direction: column;
-    }
-    textarea {
-      flex: 1;
-      resize: none;
-      padding: 1rem;
-      font-family: monospace;
-      font-size: 1rem;
-      background: #1e1e1e;
-      color: #fff;
-      border: none;
-      outline: none;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: white;
     }
     .top-bar {
       display: flex;
@@ -62,50 +32,164 @@
     .btn:hover {
       background: #666;
     }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .simulator {
+      flex: 1;
+      background: #2b2b2b;
+      border-bottom: 2px solid #444;
+      position: relative;
+    }
+    .phone-frame {
+      width: 360px;
+      height: 640px;
+      border: 12px solid #555;
+      border-radius: 40px;
+      margin: 1rem auto;
+      background: #000;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      overflow: hidden;
+      position: relative;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+    .editors {
+      display: flex;
+      flex-direction: row;
+      height: 50%;
+    }
+    .editor {
+      flex: 1;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .editor label {
+      background: #222;
+      padding: 0.3rem;
+      text-align: center;
+      border-bottom: 1px solid #333;
+    }
+    .code-wrapper {
+      display: flex;
+      overflow: hidden;
+      flex: 1;
+    }
+    .line-numbers {
+      background: #1c1c1c;
+      color: #888;
+      text-align: right;
+      padding: 0.5rem;
+      user-select: none;
+    }
+    .line-numbers div {
+      height: 1.2rem;
+    }
+    textarea {
+      flex: 1;
+      resize: none;
+      padding: 0.5rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      background: #1e1e1e;
+      color: #fff;
+      border: none;
+      outline: none;
+      line-height: 1.2rem;
+    }
   </style>
 </head>
 <body>
   <div class="top-bar">
-    <div>🧪 شبیه‌ساز کدنویسی</div>
+    <div>🧪 شبیه‌ساز کدنویسی پیشرفته</div>
     <button class="btn" onclick="toggleTheme()">تغییر حالت شب/روز</button>
-  </div>  <div class="simulator">
-    <iframe id="preview"></iframe>
-  </div>
+  </div>  <div class="container">
+    <div class="simulator">
+      <div class="phone-frame">
+        <iframe id="preview"></iframe>
+      </div>
+    </div><div class="editors">
   <div class="editor">
-    <textarea id="code" placeholder="اینجا کد بنویسید...">
-<!DOCTYPE html>
+    <label>HTML</label>
+    <div class="code-wrapper">
+      <div class="line-numbers" id="lines-html"></div>
+      <textarea id="code-html" oninput="updatePreview()" placeholder="کد HTML را اینجا بنویسید..."><!DOCTYPE html>
+
 <html>
+  <head>
+    <title>مثال</title>
+  </head>
   <body>
     <h1>سلام دنیا!</h1>
-    <p>این یک شبیه‌ساز ساده است.</p>
+    <p>این یک مثال است.</p>
   </body>
-</html>
-    </textarea>
+</html></textarea>
+        </div>
+      </div>
+      <div class="editor">
+        <label>CSS</label>
+        <div class="code-wrapper">
+          <div class="line-numbers" id="lines-css"></div>
+          <textarea id="code-css" oninput="updatePreview()" placeholder="کد CSS را اینجا بنویسید...">body {
+  background: #fefefe;
+  font-family: sans-serif;
+  color: #333;
+}</textarea>
+        </div>
+      </div>
+      <div class="editor">
+        <label>JavaScript</label>
+        <div class="code-wrapper">
+          <div class="line-numbers" id="lines-js"></div>
+          <textarea id="code-js" oninput="updatePreview()" placeholder="کد JS را اینجا بنویسید...">console.log('سلام!');</textarea>
+        </div>
+      </div>
+    </div>
   </div>  <script>
-    const codeInput = document.getElementById('code');
+    const htmlInput = document.getElementById('code-html');
+    const cssInput = document.getElementById('code-css');
+    const jsInput = document.getElementById('code-js');
     const preview = document.getElementById('preview');
 
     function updatePreview() {
-      const code = codeInput.value;
-      preview.srcdoc = code;
-    }
+      const html = htmlInput.value;
+      const css = '<style>' + cssInput.value + '</style>';const js = '<script>' + jsInput.value + '<\/script>';
+  preview.srcdoc = html + css + js;
 
-    codeInput.addEventListener('input', updatePreview);
-    window.addEventListener('load', updatePreview);
+  updateLineNumbers('lines-html', html);
+  updateLineNumbers('lines-css', cssInput.value);
+  updateLineNumbers('lines-js', jsInput.value);
+}
 
-    function toggleTheme() {
-      const body = document.body;
-      if (body.style.background === 'white') {
-        body.style.background = '#1e1e1e';
-        body.style.color = 'white';
-        document.querySelector('textarea').style.background = '#1e1e1e';
-        document.querySelector('textarea').style.color = 'white';
-      } else {
-        body.style.background = 'white';
-        body.style.color = 'black';
-        document.querySelector('textarea').style.background = '#f0f0f0';
-        document.querySelector('textarea').style.color = 'black';
-      }
-    }
-  </script></body>
+function updateLineNumbers(id, content) {
+  const lines = content.split('\n').length;
+  const container = document.getElementById(id);
+  container.innerHTML = '';
+  for (let i = 1; i <= lines; i++) {
+    container.innerHTML += `<div>${i}</div>`;
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.body.style.background === 'white';
+  document.body.style.background = isDark ? '#1e1e1e' : 'white';
+  document.body.style.color = isDark ? 'white' : 'black';
+  document.querySelectorAll('textarea').forEach(el => {
+    el.style.background = isDark ? '#1e1e1e' : '#f0f0f0';
+    el.style.color = isDark ? 'white' : 'black';
+  });
+}
+
+window.addEventListener('load', updatePreview);
+
+  </script>
+</body>
 </html>
