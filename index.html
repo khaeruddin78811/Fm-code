@@ -28,6 +28,7 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin-left: 0.5rem;
     }
     .btn:hover {
       background: #666;
@@ -53,6 +54,11 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
       overflow: hidden;
       position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .phone-frame.animate {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(255,255,255,0.2);
     }
     iframe {
       width: 100%;
@@ -110,10 +116,13 @@
 <body>
   <div class="top-bar">
     <div>🧪 شبیه‌ساز کدنویسی پیشرفته</div>
-    <button class="btn" onclick="toggleTheme()">تغییر حالت شب/روز</button>
+    <div>
+      <button class="btn" onclick="toggleTheme()">🌗 تم شب/روز</button>
+      <button class="btn" onclick="downloadProject()">⬇️ دانلود</button>
+    </div>
   </div>  <div class="container">
     <div class="simulator">
-      <div class="phone-frame">
+      <div class="phone-frame" id="phone-frame">
         <iframe id="preview"></iframe>
       </div>
     </div><div class="editors">
@@ -121,43 +130,31 @@
     <label>HTML</label>
     <div class="code-wrapper">
       <div class="line-numbers" id="lines-html"></div>
-      <textarea id="code-html" oninput="updatePreview()" placeholder="کد HTML را اینجا بنویسید..."><!DOCTYPE html>
-
-<html>
-  <head>
-    <title>مثال</title>
-  </head>
-  <body>
-    <h1>سلام دنیا!</h1>
-    <p>این یک مثال است.</p>
-  </body>
-</html></textarea>
-        </div>
-      </div>
-      <div class="editor">
-        <label>CSS</label>
-        <div class="code-wrapper">
-          <div class="line-numbers" id="lines-css"></div>
-          <textarea id="code-css" oninput="updatePreview()" placeholder="کد CSS را اینجا بنویسید...">body {
-  background: #fefefe;
-  font-family: sans-serif;
-  color: #333;
-}</textarea>
-        </div>
-      </div>
-      <div class="editor">
-        <label>JavaScript</label>
-        <div class="code-wrapper">
-          <div class="line-numbers" id="lines-js"></div>
-          <textarea id="code-js" oninput="updatePreview()" placeholder="کد JS را اینجا بنویسید...">console.log('سلام!');</textarea>
-        </div>
-      </div>
+      <textarea id="code-html" placeholder="کد HTML را اینجا بنویسید..."></textarea>
     </div>
+  </div>
+  <div class="editor">
+    <label>CSS</label>
+    <div class="code-wrapper">
+      <div class="line-numbers" id="lines-css"></div>
+      <textarea id="code-css" placeholder="کد CSS را اینجا بنویسید..."></textarea>
+    </div>
+  </div>
+  <div class="editor">
+    <label>JavaScript</label>
+    <div class="code-wrapper">
+      <div class="line-numbers" id="lines-js"></div>
+      <textarea id="code-js" placeholder="کد JS را اینجا بنویسید..."></textarea>
+    </div>
+  </div>
+</div>
+
   </div>  <script>
     const htmlInput = document.getElementById('code-html');
     const cssInput = document.getElementById('code-css');
     const jsInput = document.getElementById('code-js');
     const preview = document.getElementById('preview');
+    const phoneFrame = document.getElementById('phone-frame');
 
     function updatePreview() {
       const html = htmlInput.value;
@@ -167,6 +164,13 @@
   updateLineNumbers('lines-html', html);
   updateLineNumbers('lines-css', cssInput.value);
   updateLineNumbers('lines-js', jsInput.value);
+
+  phoneFrame.classList.add('animate');
+  setTimeout(() => phoneFrame.classList.remove('animate'), 300);
+
+  localStorage.setItem('code-html', html);
+  localStorage.setItem('code-css', cssInput.value);
+  localStorage.setItem('code-js', jsInput.value);
 }
 
 function updateLineNumbers(id, content) {
@@ -188,7 +192,33 @@ function toggleTheme() {
   });
 }
 
-window.addEventListener('load', updatePreview);
+function downloadProject() {
+  const html = htmlInput.value;
+  const css = cssInput.value;
+  const js = jsInput.value;
+
+  const fullHTML = `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+
+  const blob = new Blob([fullHTML], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'project.html';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+window.addEventListener('load', () => {
+  htmlInput.value = localStorage.getItem('code-html') || '<h1>سلام دنیا!</h1>';
+  cssInput.value = localStorage.getItem('code-css') || 'body { font-family: sans-serif; color: #333; }';
+  jsInput.value = localStorage.getItem('code-js') || "console.log('شروع شد');";
+  updatePreview();
+});
+
+htmlInput.addEventListener('input', updatePreview);
+cssInput.addEventListener('input', updatePreview);
+jsInput.addEventListener('input', updatePreview);
 
   </script>
 </body>
