@@ -1,154 +1,108 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>شبیه‌ساز کدنویسی</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Vazirmatn', sans-serif; background: #1e1e1e; color: white; }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      direction: rtl;
+    }
+
     header {
-      background: #252526;
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 20px;
-      align-items: center;
-      border-bottom: 1px solid #444;
-    }
-    header .menu {
-      display: flex;
-      gap: 20px;
-    }
-    header .menu a {
+      background: #1e1e1e;
       color: white;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 50px);
-    }
-    .editor-container {
-      flex: 1;
-      display: flex;
-    }
-    .editor, .preview {
-      flex: 1;
-      height: 100%;
-      border: 1px solid #333;
-    }
-    #preview {
-      background: white;
-      color: black;
-    }
-    .toolbar {
       padding: 10px;
-      background: #333;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      flex-wrap: wrap;
     }
-    button {
-      background: #007acc;
+
+    header select, header button {
+      margin: 5px;
+      padding: 6px;
+      border-radius: 8px;
       border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
     }
-    select {
-      padding: 5px;
-      background: #444;
-      color: white;
-      border: 1px solid #555;
-      border-radius: 4px;
+
+    #container {
+      display: flex;
+      height: calc(100% - 60px);
+      flex-direction: row;
     }
-    .fullscreen {
+
+    #editor {
+      width: 50%;
       height: 100%;
+    }
+
+    #output {
+      width: 50%;
+      height: 100%;
+      background: white;
+      overflow: auto;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="menu">
-      <a href="#">درباره ما</a>
-      <a href="#">راهنما</a>
-      <a href="#">تماس با ما</a>
-      <a href="#">ورود / ثبت‌نام</a>
-    </div>
+    <div>شبیه‌ساز کدنویسی</div>
     <div>
+      <select id="languageSelector">
+        <option value="html">HTML/CSS/JS</option>
+        <option value="javascript">JavaScript</option>
+        <!-- زبان‌های دیگر -->
+      </select>
       <select id="themeSelector">
         <option value="vs-dark">تاریک</option>
-        <option value="vs">روشن</option>
-        <option value="hc-black">کنتراست بالا</option>
+        <option value="vs-light">روشن</option>
       </select>
+      <button onclick="runCode()">اجرا</button>
     </div>
-  </header>  <div class="toolbar">
-    <button onclick="runCode()"><i class="fa fa-play"></i> اجرا کن</button>
-    <input type="file" onchange="loadFile(event)" />
-    <button onclick="downloadCode()"><i class="fa fa-download"></i> دانلود کد</button>
-    <select id="languageSelector">
-      <option value="html">HTML/CSS/JS</option>
-      <option value="javascript">JavaScript</option>
-      <option value="python">Python</option>
-      <option value="cpp">C++</option>
-      <option value="java">Java</option>
-    </select>
-  </div>  <div class="container">
-    <div class="editor-container">
-      <div id="editor" class="editor"></div>
-      <iframe id="preview" class="preview"></iframe>
-    </div>
-  </div>  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>  <script>
-    let editor;
-    require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs' } });
-    require(['vs/editor/editor.main'], function () {
-      editor = monaco.editor.create(document.getElementById('editor'), {
-        value: '<!DOCTYPE html>\n<html>\n<head><style>body { font-family: sans-serif; }</style></head>\n<body>\n<h1>سلام دنیا!</h1>\n<script>console.log("Hello World")</script>\n</body>\n</html>',language: 'html',
-    theme: 'vs-dark',
-    automaticLayout: true,
-  });
-});
+  </header>
 
-document.getElementById('themeSelector').addEventListener('change', (e) => {
-  monaco.editor.setTheme(e.target.value);
-});
+  <div id="container">
+    <div id="editor"></div>
+    <div id="output"><iframe id="resultFrame"></iframe></div>
+  </div>
 
-document.getElementById('languageSelector').addEventListener('change', (e) => {
-  const lang = e.target.value;
-  monaco.editor.setModelLanguage(editor.getModel(), lang === 'html' ? 'html' : lang);
-});
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+  <script>
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
+    require(["vs/editor/editor.main"], function () {
+      window.editor = monaco.editor.create(document.getElementById('editor'), {
+        value: "<!DOCTYPE html>\n<html>\n<head><style>body{background:#eee}</style></head>\n<body>\n<h1>سلام دنیا</h1>\n</body>\n</html>",
+        language: "html",
+        theme: "vs-dark",
+        automaticLayout: true,
+      });
 
-function runCode() {
-  const lang = document.getElementById('languageSelector').value;
-  const code = editor.getValue();
+      document.getElementById("themeSelector").addEventListener("change", e => {
+        monaco.editor.setTheme(e.target.value);
+      });
 
-  if (lang === 'html') {
-    document.getElementById('preview').srcdoc = code;
-  } else {
-    alert('اجرای زنده فقط برای HTML/CSS/JS فعال است. برای زبان‌ دیگر از API استفاده خواهد شد.');
-  }
-}
+      document.getElementById("languageSelector").addEventListener("change", e => {
+        monaco.editor.setModelLanguage(editor.getModel(), e.target.value);
+      });
+    });
 
-function loadFile(event) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    editor.setValue(e.target.result);
-  };
-  reader.readAsText(event.target.files[0]);
-}
-
-function downloadCode() {
-  const blob = new Blob([editor.getValue()], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'code.txt';
-  a.click();
-}
-
+    function runCode() {
+      const code = editor.getValue();
+      const frame = document.getElementById("resultFrame");
+      frame.srcdoc = code;
+    }
   </script>
 </body>
 </html>
