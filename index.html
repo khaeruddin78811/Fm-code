@@ -1,179 +1,169 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>کدنویسی زنده</title>
-  <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Simulator</title>
   <style>
     body {
       margin: 0;
-      background: #1e1e1e;
-      color: white;
-      font-family: 'Consolas', monospace;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      font-family: 'Courier New', monospace;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
     }
     header {
-      background-color: #252526;
-      padding: 10px;
+      background-color: #333;
+      padding: 0.5rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      border-bottom: 2px solid #555;
     }
     header h1 {
       margin: 0;
       font-size: 1.2rem;
     }
-    header .buttons button {
-      margin-left: 10px;
-      padding: 5px 10px;
-      background: #007acc;
+    nav {
+      display: flex;
+      gap: 10px;
+    }
+    nav button {
+      background-color: #444;
       border: none;
-      border-radius: 5px;
       color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 5px;
       cursor: pointer;
     }
-    .editor-container {
+    .container {
       display: flex;
-      flex: 1;
-      padding: 10px;
-      gap: 10px;
-      background: #1e1e1e;
+      height: calc(100vh - 60px);
     }
-    textarea {
+    .editor, .output {
       flex: 1;
-      background: #1e1e1e;
-      color: white;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #444;
-      box-shadow: 0 0 10px #00000066;
-      resize: none;
+      padding: 1rem;
+      box-sizing: border-box;
     }
-    iframe, .output {
-      flex: 1;
-      background: #ffffff;
-      border: 1px solid #444;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00000066;
+    .editor {
+      background-color: #1e1e1e;
+      box-shadow: inset 0 0 10px #000;
+      border-right: 2px solid #555;
     }
     .output {
-      padding: 10px;
-      background: #000;
-      color: #0f0;
-      font-size: 0.9rem;
-      overflow-y: auto;
-      white-space: pre-wrap;
+      background-color: #121212;
+      box-shadow: inset 0 0 10px #000;
     }
-    .controls {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-      background: #252526;
-    }
-    select, input[type="file"] {
-      background: #333;
-      color: white;
-      border: 1px solid #666;
-      padding: 5px;
-      border-radius: 5px;
-    }
-    button {
-      background: #007acc;
-      color: white;
+    textarea {
+      width: 100%;
+      height: 90%;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: monospace;
+      font-size: 1rem;
       border: none;
-      padding: 5px 10px;
+      outline: none;
+      resize: none;
+      line-height: 1.4;
+    }
+    .line-numbers {
+      float: left;
+      text-align: right;
+      margin-right: 10px;
+      user-select: none;
+      color: #888;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      background: white;
+      border: none;
+    }
+    .run-btn {
+      margin-top: 10px;
+      background-color: #007acc;
+      color: white;
+      padding: 0.4rem 1rem;
+      border: none;
       border-radius: 5px;
       cursor: pointer;
+    }
+    .drawer-menu {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      width: 200px;
+      height: calc(100vh - 60px);
+      background-color: #222;
+      padding: 1rem;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 2px 0 10px #000;
+    }
+    .drawer-menu.open {
+      display: flex;
+    }
+    .syntax-highlight span.keyword {
+      color: #569CD6;
+    }
+    .syntax-highlight span.string {
+      color: #D69D85;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>محیط مدرن کدنویسی</h1>
-    <div class="buttons">
-      <button onclick="about()">درباره ما</button>
-      <button onclick="showHelp()">راهنما</button>
-      <button onclick="downloadCode()">دانلود پروژه</button>
-      <input type="file" onchange="uploadCode(event)" />
-    </div>
+    <h1>Code Simulator</h1>
+    <nav>
+      <button onclick="toggleDrawer()">☰ منو</button>
+      <button>درباره ما</button>
+      <button>راهنما</button>
+      <button>دانلود</button>
+      <button>آپلود</button>
+      <button>پشتیبانی</button>
+    </nav>
   </header>
-  <div class="controls">
-    <label>زبان برنامه‌نویسی:
-      <select id="language" onchange="changeLanguage()">
-        <option value="html">HTML/CSS/JS</option>
-        <option value="python">Python</option>
-        <option value="cpp">C++</option>
-        <option value="java">Java</option>
-      </select>
-    </label>
+  <div class="drawer-menu" id="drawer">
+    <strong>اطلاعات بیشتر:</strong>
+    <p>این یک شبیه‌ساز ساده با زبان‌های مختلف است.</p>
+    <p>پشتیبانی از Python، HTML، CSS، JS</p>
+    <p>تم گرافیکی قابل شخصی‌سازی</p>
   </div>
-  <div class="editor-container">
-    <textarea id="editor" rows="20" placeholder="کد خود را اینجا بنویسید..."></textarea>
-    <iframe id="viewer"></iframe>
-  </div>
-  <div class="output" id="terminal"></div>  <script>
-    const editor = document.getElementById('editor');
-    const viewer = document.getElementById('viewer');
-    const terminal = document.getElementById('terminal');
+  <div class="container">
+    <div class="editor">
+      <div class="line-numbers" id="lines"></div>
+      <textarea id="code" oninput="updateLineNumbers(); highlightCode();">print("Hello, World!")</textarea>
+      <button class="run-btn" onclick="runCode()">▶ اجرا</button>
+    </div>
+    <div class="output">
+      <iframe id="display"></iframe>
+    </div>
+  </div>  <script>
+    const code = document.getElementById("code");
+    const lines = document.getElementById("lines");
+    const drawer = document.getElementById("drawer");
 
-    editor.addEventListener('input', update);
-
-    function update() {
-      const lang = document.getElementById('language').value;
-      localStorage.setItem('code', editor.value);
-      if (lang === 'html') {
-        viewer.srcdoc = editor.value;
-      } else if (lang === 'python') {
-        terminal.innerText = '[Python Simulation]\n' + simulatePython(editor.value);
-      } else {
-        terminal.innerText = `[${lang} Simulation]`;
-      }
+    function updateLineNumbers() {
+      const count = code.value.split("\n").length;
+      lines.innerHTML = Array.from({ length: count }, (_, i) => (i + 1)).join("<br>");
     }
 
-    function simulatePython(code) {
-      if (code.includes('print')) {
-        return 'Hello from Python!';
-      }
-      return '[Code executed]';
+    function toggleDrawer() {
+      drawer.classList.toggle("open");
     }
 
-    function downloadCode() {
-      const blob = new Blob([editor.value], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'project.txt';
-      a.click();
-    }
+    function runCode() {
+      const content = code.value;
+      const display = document.getElementById("display");
+      display.srcdoc = content.includes("<html") ? content : `<pre>${content}</pre>`;}
 
-    function uploadCode(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        editor.value = e.target.result;
-        update();
-      };
-      reader.readAsText(file);
-    }
+function highlightCode() {
+  let highlighted = code.value
+    .replace(/(function|var|let|const|print)/g, '<span class="keyword">$1</span>')
+    .replace(/(".*?"|\'.*?\')/g, '<span class="string">$1</span>');
+}
 
-    function about() {
-      alert('این پروژه یک محیط توسعه زنده برای تمرین برنامه‌نویسی است.');
-    }
+updateLineNumbers();
 
-    function showHelp() {
-      alert('از منوی بالا زبان را انتخاب کنید و کد بنویسید.');
-    }
-
-    // Load from localStorage
-    window.onload = () => {
-      const savedCode = localStorage.getItem('code');
-      if (savedCode) {
-        editor.value = savedCode;
-        update();
-      }
-    };
-  </script></body>
+  </script>
+</body>
 </html>
