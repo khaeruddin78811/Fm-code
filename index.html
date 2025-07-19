@@ -1,108 +1,157 @@
-<!DOCTYPE html>
-<html lang="fa">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>شبیه‌ساز کدنویسی</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Simulator</title>
   <style>
-    body, html {
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: sans-serif;
-      direction: rtl;
     }
-
+    body {
+      font-family: monospace;
+      background-color: #1e1e1e;
+      color: #ccc;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
     header {
-      background: #1e1e1e;
-      color: white;
-      padding: 10px;
+      background-color: #111;
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
-
-    header select, header button {
-      margin: 5px;
-      padding: 6px;
-      border-radius: 8px;
+    header h1 {
+      color: #61dafb;
+      font-size: 1.2rem;
+    }
+    nav button {
+      margin-left: 10px;
+      background: #333;
       border: none;
+      color: #61dafb;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
     }
-
-    #container {
+    .container {
+      flex: 1;
       display: flex;
-      height: calc(100% - 60px);
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .editor-container {
+      flex: 1;
+      display: flex;
       flex-direction: row;
     }
-
-    #editor {
-      width: 50%;
-      height: 100%;
+    .editor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #1e1e1e;
+      border-right: 1px solid #444;
     }
-
-    #output {
-      width: 50%;
-      height: 100%;
-      background: white;
-      overflow: auto;
+    .editor label {
+      background-color: #333;
+      padding: 6px;
+      color: #fff;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #444;
     }
-
-    iframe {
-      width: 100%;
-      height: 100%;
+    .editor textarea {
+      flex: 1;
+      background-color: #1e1e1e;
+      color: #ccc;
       border: none;
+      padding: 10px;
+      font-family: monospace;
+      resize: none;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .output-container {
+      height: 200px;
+      border-top: 2px solid #444;
+      display: flex;
+      flex-direction: column;
+    }
+    .output {
+      flex: 1;
+      background: #000;
+      color: #0f0;
+      padding: 10px;
+      font-family: monospace;
+      overflow-y: auto;
+    }
+    .buttons {
+      padding: 10px;
+      background-color: #222;
+      text-align: center;
+    }
+    .buttons button {
+      background: #0f62fe;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
   <header>
-    <div>شبیه‌ساز کدنویسی</div>
-    <div>
-      <select id="languageSelector">
-        <option value="html">HTML/CSS/JS</option>
-        <option value="javascript">JavaScript</option>
-        <!-- زبان‌های دیگر -->
-      </select>
-      <select id="themeSelector">
-        <option value="vs-dark">تاریک</option>
-        <option value="vs-light">روشن</option>
-      </select>
-      <button onclick="runCode()">اجرا</button>
+    <h1>Code Simulator</h1>
+    <nav>
+      <button>About</button>
+      <button>Support</button>
+      <button>Upload</button>
+      <button>Download</button>
+    </nav>
+  </header>  <div class="container">
+    <div class="editor-container">
+      <div class="editor">
+        <label for="html">HTML</label>
+        <textarea id="html" placeholder="Write HTML here..."></textarea>
+      </div>
+      <div class="editor">
+        <label for="css">CSS</label>
+        <textarea id="css" placeholder="Write CSS here..."></textarea>
+      </div>
+      <div class="editor">
+        <label for="js">JavaScript</label>
+        <textarea id="js" placeholder="Write JavaScript here..."></textarea>
+      </div>
     </div>
-  </header>
-
-  <div id="container">
-    <div id="editor"></div>
-    <div id="output"><iframe id="resultFrame"></iframe></div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
-  <script>
-    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
-    require(["vs/editor/editor.main"], function () {
-      window.editor = monaco.editor.create(document.getElementById('editor'), {
-        value: "<!DOCTYPE html>\n<html>\n<head><style>body{background:#eee}</style></head>\n<body>\n<h1>سلام دنیا</h1>\n</body>\n</html>",
-        language: "html",
-        theme: "vs-dark",
-        automaticLayout: true,
-      });
-
-      document.getElementById("themeSelector").addEventListener("change", e => {
-        monaco.editor.setTheme(e.target.value);
-      });
-
-      document.getElementById("languageSelector").addEventListener("change", e => {
-        monaco.editor.setModelLanguage(editor.getModel(), e.target.value);
-      });
-    });
-
+    <div class="buttons">
+      <button onclick="runCode()">Run Code</button>
+    </div>
+    <div class="output-container">
+      <div class="output" id="output"></div>
+    </div>
+  </div>  <script>
     function runCode() {
-      const code = editor.getValue();
-      const frame = document.getElementById("resultFrame");
-      frame.srcdoc = code;
-    }
+      const html = document.getElementById("html").value;
+      const css = `<style>${document.getElementById("css").value}</style>`;const js = `<script>${document.getElementById("js").value}<\/script>`;
+  const result = html + css + js;
+  const output = document.getElementById("output");
+  const iframe = document.createElement("iframe");
+  iframe.style.width = "100%";
+  iframe.style.height = "100%";
+  iframe.style.border = "none";
+  output.innerHTML = "";
+  output.appendChild(iframe);
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(result);
+  doc.close();
+}
+
   </script>
 </body>
 </html>
