@@ -1,114 +1,45 @@
-<!DOCTYPE html>
-<html lang="fa">
-<head>
-  <meta charset="UTF-8">
-  <title>شبیه CodePen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css" rel="stylesheet" />
-  <style>
-    body, html { margin:0; padding:0; height:100%; font-family:sans-serif; direction:rtl; }
-    .topbar { height:50px; background:#252526; display:flex; align-items:center; justify-content:space-between; padding:0 15px; color:#eee; }
-    .topbar select, .topbar button, .topbar input { margin:0 5px; padding:6px; border-radius:6px; border:none; background:#3A3D41; color:white; }
-    .main { display:flex; height:calc(100% - 50px); }
-    .panel { flex:1; display:flex; flex-direction:column; }
-    #editorHtml, #editorCss, #editorJs { height:33.33%; border-bottom:1px solid #444; }
-    .preview { flex:1; background:#fff; }
-    iframe { width:100%; height:100%; border:none; }
-  </style>
-</head>
-<body>
+// یک محیط شبیه‌ساز مدرن شبیه CodePen با حالت تک‌زبانه و ترکیبی import { useState } from 'react'; import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; import { Button } from "@/components/ui/button"; import { Textarea } from "@/components/ui/textarea"; import { Card } from "@/components/ui/card";
 
-  <div class="topbar">
-    <div>
-      <button onclick="runAll()">▶ اجرا</button>
-      <button onclick="saveCode()">💾 ذخیره</button>
-      <input type="file" onchange="loadFile(event)">
-    </div>
-    <div>
-      <select id="themeSel">
-        <option value="vs-dark">تاریک</option>
-        <option value="vs">روشن</option>
-      </select>
-      <select id="langMode">
-        <option value="html">HTML/CSS/JS</option>
-        <option value="javascript">JavaScript</option>
-      </select>
-    </div>
+export default function CodePlayground() { const [html, setHtml] = useState("<!-- HTML code here -->"); const [css, setCss] = useState("/* CSS code here */"); const [js, setJs] = useState("// JavaScript code here"); const [languageMode, setLanguageMode] = useState("combo"); const [output, setOutput] = useState("");
+
+const compileCode = () => { if (languageMode === "combo") { const fullOutput = <html> <style>${css}</style> <body> ${html} <script>${js}<\/script> </body> </html>; setOutput(fullOutput); } else if (languageMode === "html") { setOutput(html); } else if (languageMode === "css") { setOutput(<style>${css}</style>); } else if (languageMode === "js") { setOutput(<script>${js}<\/script>); } };
+
+const downloadProject = () => { const blob = new Blob([output], { type: "text/html" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = project_${Date.now()}.html; a.click(); };
+
+return ( <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-2"> <div className="flex justify-between items-center mb-2"> <select value={languageMode} onChange={(e) => setLanguageMode(e.target.value)} className="bg-gray-800 p-2 rounded" > <option value="combo">HTML/CSS/JS</option> <option value="html">HTML</option> <option value="css">CSS</option> <option value="js">JavaScript</option> </select> <div className="space-x-2"> <Button onClick={compileCode}>▶ استارت</Button> <Button onClick={downloadProject}>⬇ دانلود خروجی</Button> </div> </div>
+
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <Card className="bg-black p-2">
+      {languageMode === "combo" || languageMode === "html" ? (
+        <>
+          <label>HTML</label>
+          <Textarea rows={5} value={html} onChange={(e) => setHtml(e.target.value)} />
+        </>
+      ) : null}
+      {languageMode === "combo" || languageMode === "css" ? (
+        <>
+          <label>CSS</label>
+          <Textarea rows={5} value={css} onChange={(e) => setCss(e.target.value)} />
+        </>
+      ) : null}
+      {languageMode === "combo" || languageMode === "js" ? (
+        <>
+          <label>JavaScript</label>
+          <Textarea rows={5} value={js} onChange={(e) => setJs(e.target.value)} />
+        </>
+      ) : null}
+    </Card>
+
+    <Card className="bg-white text-black p-2 min-h-[400px]">
+      <iframe
+        className="w-full h-full border-none"
+        title="Preview"
+        sandbox="allow-scripts allow-same-origin"
+        srcDoc={output}
+      />
+    </Card>
   </div>
+</div>
 
-  <div class="main">
-    <div class="panel">
-      <div id="editorHtml"></div>
-      <div id="editorCss"></div>
-      <div id="editorJs"></div>
-    </div>
-    <div class="panel preview">
-      <iframe id="frame"></iframe>
-    </div>
-  </div>
+); }
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.js"></script>
-  <script>
-    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
-    require(['vs/editor/editor.main'], () => {
-      window.htmlEditor = monaco.editor.create(document.getElementById('editorHtml'), {
-        language: 'html', theme: 'vs-dark', automaticLayout:true, minimap:{enabled:false}
-      });
-      window.cssEditor = monaco.editor.create(document.getElementById('editorCss'), {
-        language: 'css', theme: 'vs-dark', automaticLayout:true, minimap:{enabled:false}
-      });
-      window.jsEditor = monaco.editor.create(document.getElementById('editorJs'), {
-        language: 'javascript', theme: 'vs-dark', automaticLayout:true, minimap:{enabled:false}
-      });
-
-      document.getElementById('themeSel').onchange = e => {
-        monaco.editor.setTheme(e.target.value);
-      };
-      document.getElementById('langMode').onchange = e => {
-        const lang = e.target.value;
-        htmlEditor.updateOptions({ readOnly: lang !== 'html' });
-        cssEditor.updateOptions({ readOnly: lang !== 'html' });
-        jsEditor.updateOptions({ readOnly: lang === 'html' ? false : (lang === 'javascript') });
-      };
-
-      window.runAll = () => {
-        const html = htmlEditor.getValue();
-        const css = `<style>${cssEditor.getValue()}</style>`;
-        const js = `<script>${jsEditor.getValue()}<\/script>`;
-        document.getElementById('frame').srcdoc = html + css + js;
-      };
-
-      window.saveCode = () => {
-        const data = {
-          html: htmlEditor.getValue(),
-          css: cssEditor.getValue(),
-          js: jsEditor.getValue()
-        };
-        localStorage.setItem('myCodePen', JSON.stringify(data));
-        alert('ذخیره‌شد!');
-      };
-
-      const loaded = localStorage.getItem('myCodePen');
-      if (loaded) {
-        const d = JSON.parse(loaded);
-        htmlEditor.setValue(d.html);
-        cssEditor.setValue(d.css);
-        jsEditor.setValue(d.js);
-      }
-    });
-
-    function loadFile(e) {
-      const file = e.target.files[0];
-      const ext = file.name.split('.').pop();
-      const reader = new FileReader();
-      reader.onload = () => {
-        const txt = reader.result;
-        if (ext === 'html') htmlEditor.setValue(txt);
-        if (ext === 'css') cssEditor.setValue(txt);
-        if (ext === 'js') jsEditor.setValue(txt);
-      };
-      reader.readAsText(file);
-    }
-  </script>
-</body>
-</html>
