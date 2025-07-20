@@ -1,91 +1,116 @@
-// محیط برنامه‌نویسی کامل با HTML/CSS/JS + حالت تک‌زبانه و ترکیبی + قابلیت دانلود تصویر یا فیلم از خروجی
-
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>شبیه‌ساز کدنویسی</title>
-  <link href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.css" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Editor with Export</title>
   <style>
-    * { box-sizing: border-box; direction: rtl; font-family: sans-serif; }
-    body { margin: 0; background-color: #1e1e1e; color: #fff; }
-    header { background: #111; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
-    header button { background: #333; color: #fff; border: none; padding: 8px 14px; margin: 0 4px; cursor: pointer; border-radius: 8px; }
-    .editor-container { display: flex; height: 50vh; border-bottom: 4px solid #333; }
-    .editor { flex: 1; padding: 10px; background: #282c34; color: #f8f8f2; outline: none; font-family: monospace; resize: none; overflow: auto; border-left: 2px solid #444; }
-    .editor:first-child { border-left: none; }
-    .editor::selection { background: #444; }
-    .output-container { height: 50vh; background: #fff; box-shadow: 0 0 10px #000; position: relative; }
-    iframe { width: 100%; height: 100%; border: none; }
-    .mode-switch { margin: 0 10px; }
-    select { padding: 6px; background: #222; color: #fff; border-radius: 6px; border: 1px solid #444; }
-    .hidden { display: none; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: white;
+    }
+    textarea {
+      width: 90%;
+      height: 200px;
+      margin: 10px;
+      background: #2d2d2d;
+      color: white;
+      border: none;
+      padding: 10px;
+      font-family: monospace;
+    }
+    iframe {
+      width: 90%;
+      height: 300px;
+      margin: 20px 0;
+      border: 2px solid #555;
+      background: white;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    input[type="number"] {
+      margin: 5px;
+      width: 80px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <button onclick="runCode()">▶️ اجرا</button>
-      <button onclick="downloadImage()">📷 عکس خروجی</button>
-      <button onclick="downloadVideo()">🎥 ویدیو خروجی</button>
-    </div>
-    <div class="mode-switch">
-      حالت زبان:
-      <select id="mode" onchange="switchMode()">
-        <option value="combo">HTML/CSS/JS (ترکیبی)</option>
-        <option value="html">HTML (تکی)</option>
-        <option value="css">CSS (تکی)</option>
-        <option value="js">JS (تکی)</option>
-        <option value="py">Python (شبیه‌سازی)</option>
-      </select>
-    </div>
-  </header>
-  <div class="editor-container">
-    <textarea id="html" class="editor" placeholder="کد HTML بنویسید..." spellcheck="false"></textarea>
-    <textarea id="css" class="editor" placeholder="کد CSS بنویسید..." spellcheck="false"></textarea>
-    <textarea id="js" class="editor" placeholder="کد JavaScript بنویسید..." spellcheck="false"></textarea>
-    <textarea id="py" class="editor hidden" placeholder="کد Python بنویسید..." spellcheck="false"></textarea>
-  </div>
-  <div class="output-container">
-    <iframe id="output"></iframe>
-  </div>  <script>
-    const htmlEditor = document.getElementById("html");
-    const cssEditor = document.getElementById("css");
-    const jsEditor = document.getElementById("js");
-    const pyEditor = document.getElementById("py");
-    const modeSelect = document.getElementById("mode");
+  <h1>کدنویس آنلاین + خروجی</h1>
+  <textarea id="code" placeholder="کدت رو اینجا بنویس...">
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Hello World</h1>
+    <audio controls autoplay>
+      <source src="your-audio.mp3" type="audio/mpeg">
+    </audio>
+  </body>
+</html>
+  </textarea>
+  <br />
+  <button onclick="runCode()">اجرای کد ▶️</button>
+  <button onclick="captureScreenshot()">📷 عکس خروجی</button>
+  <label for="duration">⏱ زمان ویدیو (ثانیه):</label>
+  <input type="number" id="duration" min="1" max="90" value="30">
+  <button onclick="recordVideo()">🎥 ضبط ویدیو خروجی</button>
+  <iframe id="output"></iframe>  <script>
+    const iframe = document.getElementById("output");
 
     function runCode() {
-      const mode = modeSelect.value;
-      if (mode === "py") {
-        const pyCode = pyEditor.value;
-        document.getElementById("output").srcdoc = `<pre style='color:black;padding:10px;'>نتیجه اجرای Python:\n${pyCode}</pre>`;return;
-  }
-  const html = htmlEditor.value;
-  const css = `<style>${cssEditor.value}</style>`;
-  const js = `<script>${jsEditor.value}<\/script>`;
-  document.getElementById("output").srcdoc = html + css + js;
-}
+      const code = document.getElementById("code").value;
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(code);
+      doc.close();
+    }
 
-function switchMode() {
-  const mode = modeSelect.value;
-  const combo = mode === "combo";
-  htmlEditor.style.display = combo || mode === "html" ? "block" : "none";
-  cssEditor.style.display = combo || mode === "css" ? "block" : "none";
-  jsEditor.style.display = combo || mode === "js" ? "block" : "none";
-  pyEditor.classList.toggle("hidden", mode !== "py");
-}
+    function captureScreenshot() {
+      html2canvas(iframe.contentDocument.body).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'screenshot.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
 
-function downloadImage() {
-  alert("قابلیت دانلود عکس به‌زودی اضافه می‌شود.");
-}
+    function recordVideo() {
+      const duration = Math.min(Number(document.getElementById('duration').value), 90);
+      const iframeWindow = iframe.contentWindow;
+      const stream = iframeWindow.document.body.captureStream();
 
-function downloadVideo() {
-  let duration = prompt("مدت زمان ویدیو را وارد کنید (بین 10 تا 90 ثانیه):", "30");
-  if (duration < 10 || duration > 90) return alert("زمان باید بین 10 تا 90 ثانیه باشد");
-  alert("قابلیت ضبط ویدیو از خروجی به‌زودی فعال خواهد شد.");
-}
+      const audio = iframeWindow.document.querySelector('audio');
+      if (audio && audio.captureStream) {
+        const audioStream = audio.captureStream();
+        const combined = new MediaStream([...stream.getTracks(), ...audioStream.getTracks()]);
+        startRecording(combined, duration);
+      } else {
+        startRecording(stream, duration);
+      }
+    }
 
-  </script>
-</body>
+    function startRecording(stream, duration) {
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "recording.webm";
+        a.click();
+      };
+
+      mediaRecorder.start();
+      setTimeout(() => mediaRecorder.stop(), duration * 1000);
+    }
+  </script>  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script></body>
 </html>
