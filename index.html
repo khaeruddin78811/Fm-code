@@ -1,137 +1,131 @@
 <!DOCTYPE html><html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>محیط کدنویسی پیشرفته</title>
+  <title>محیط کدنویسی</title>
   <style>
     body {
       margin: 0;
-      font-family: monospace;
+      font-family: sans-serif;
       background-color: #f0f0f0;
       transition: background-color 0.3s, color 0.3s;
     }
-    .dark-mode {
-      background-color: #1e1e1e;
-      color: #f0f0f0;
+    .dark {
+      background-color: #121212;
+      color: white;
     }
-    header {
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background-color: #333;
-      padding: 10px;
       color: white;
+      padding: 10px;
     }
-    .button-group {
+    .buttons {
       display: flex;
       gap: 10px;
     }
-    button, select {
-      padding: 6px 12px;
+    button {
+      padding: 8px 12px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       background-color: #555;
       color: white;
       transition: background-color 0.3s;
     }
-    button:hover, select:hover {
+    button:hover {
       background-color: #777;
+    }
+    select {
+      padding: 6px;
+      border-radius: 8px;
+      border: none;
     }
     #editor {
       width: 100%;
       height: 200px;
+      font-family: monospace;
       padding: 10px;
       border: none;
       outline: none;
-      background-color: #fff;
-      color: #000;
       font-size: 16px;
     }
-    .dark-mode #editor {
-      background-color: #2d2d2d;
-      color: #fff;
-    }
-    #viewer {
+    iframe {
       width: 100%;
-      height: 250px;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      background-color: white;
-    }
-    .dark-mode #viewer {
-      background-color: #111;
-      border-color: #444;
+      height: 300px;
+      border: none;
+      background: white;
     }
     #terminal {
       width: 100%;
-      height: 120px;
-      background-color: #000;
-      color: #0f0;
+      background: black;
+      color: lime;
       padding: 10px;
-      overflow-y: auto;
+      font-family: monospace;
       font-size: 14px;
-      box-sizing: border-box;
-    }
-    .dark-mode #terminal {
-      background-color: #111;
-      color: #0f0;
+      min-height: 150px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="button-group">
-      <select id="language">
-        <option value="html">HTML</option>
-        <option value="css">CSS</option>
-        <option value="js">JavaScript</option>
-      </select>
-      <button onclick="runCode()">اجرای کد</button>
-      <button onclick="toggleTheme()">🌓 تم شب/روز</button>
-      <button onclick="downloadImage()">📷 عکس</button>
-      <button onclick="downloadVideo()">🎞 ویدیو</button>
+  <div class="top-bar">
+    <div class="buttons">
+      <button onclick="runCode()">▶️ اجرا</button>
+      <button onclick="toggleTheme()">🌗 تم شب/روز</button>
+      <button onclick="downloadImage()">📸 دانلود عکس</button>
+      <button onclick="downloadVideo()">🎥 خروجی ویدیو</button>
     </div>
-  </header>  <textarea id="editor" placeholder="کد خود را اینجا بنویسید..."></textarea>  <div id="terminal"></div>
+    <select id="language" onchange="setLanguage()">
+      <option value="html">HTML</option>
+      <option value="css">CSS</option>
+      <option value="js">JavaScript</option>
+    </select>
+  </div>  <textarea id="editor" placeholder="کد خود را اینجا بنویسید..."></textarea>  <div id="terminal">ترمینال خروجی</div>
   <iframe id="viewer"></iframe>  <script>
-    const terminal = document.getElementById("terminal");
     const editor = document.getElementById("editor");
     const viewer = document.getElementById("viewer");
-    const languageSelect = document.getElementById("language");
+    const terminal = document.getElementById("terminal");
 
     function runCode() {
-      const lang = languageSelect.value;
-      let code = editor.value;
-      let html = "";
+      const code = editor.value;
+      const lang = document.getElementById("language").value;
+      let output = "";
 
       if (lang === "html") {
-        html = code;
+        output = code;
       } else if (lang === "css") {
-        html = `<style>${code}</style>`;} else if (lang === "js") {
-    html = `<script>${code}<\/script>`;
+        output = `<style>${code}</style>`;} else if (lang === "js") {
+    output = `<script>${code}<\/script>`;
   }
 
-  viewer.srcdoc = html;
-  terminal.innerHTML = "کد اجرا شد ✅";
+  viewer.srcdoc = output;
+  terminal.textContent = "";
 }
 
 function toggleTheme() {
-  document.body.classList.toggle("dark-mode");
+  document.body.classList.toggle("dark");
+}
+
+function setLanguage() {
+  const lang = document.getElementById("language").value;
+  editor.placeholder = `کد ${lang.toUpperCase()} خود را اینجا بنویسید...`;
 }
 
 function downloadImage() {
   html2canvas(viewer.contentDocument.body).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'output.png';
+    const link = document.createElement("a");
+    link.download = "output.png";
     link.href = canvas.toDataURL();
     link.click();
   });
 }
 
 function downloadVideo() {
-  alert("قابلیت ضبط ویدیو در حال توسعه است...");
+  alert("در حال توسعه... قابلیت ضبط ویدیو به زودی اضافه خواهد شد.");
 }
 
-  </script>  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script></body>
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
 </html>
