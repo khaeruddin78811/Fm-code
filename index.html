@@ -2,110 +2,143 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web Code Runner</title>
+  <title>Web Code Editor</title>
   <style>
     body {
       margin: 0;
       font-family: sans-serif;
-      background: #111;
-      color: white;
+      background: #1e1e1e;
+      color: #fff;
     }
     header {
-      background: #222;
+      background: #333;
       padding: 10px;
-      text-align: center;
-      font-size: 1.2em;
-      border-bottom: 4px solid red;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    #container {
+    .editor-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      height: 100vh;
+      height: 90vh;
     }
-    #editors, #preview {
+    .editor {
+      display: flex;
+      flex-direction: column;
       padding: 10px;
-      overflow: auto;
     }
     textarea {
-      width: 100%;
-      height: 100px;
-      margin-bottom: 10px;
-      background: #222;
-      color: white;
+      flex: 1;
+      margin: 5px 0;
+      background: #2d2d2d;
+      color: #00ff90;
       border: none;
-      resize: vertical;
-      padding: 8px;
+      padding: 10px;
       font-family: monospace;
+      font-size: 14px;
     }
     iframe {
       width: 100%;
       height: 100%;
-      background: white;
-      border: 2px solid #555;
+      border: 4px solid #ff4444;
+      background: #fff;
     }
-    select, button {
-      margin: 5px;
-      padding: 10px;
-      background: #444;
+    .buttons {
+      margin-top: 5px;
+      display: flex;
+      gap: 5px;
+    }
+    button {
+      padding: 6px 10px;
+      background: #0077cc;
       color: white;
       border: none;
       cursor: pointer;
+      border-radius: 6px;
     }
-    .buttons {
-      text-align: center;
-      margin: 10px;
+    select {
+      padding: 5px;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <header>🖥️ محیط اجرای کد آنلاین</header>
-  <div class="buttons">
-    <select id="language">
-      <option value="html">HTML</option>
-      <option value="python">Python</option>
-      <option value="css">CSS</option>
-      <option value="js">JavaScript</option>
-    </select>
-    <button onclick="runCode()">▶️ اجرای کد</button>
-    <button onclick="downloadScreenshot()">📸 ذخیره عکس خروجی</button>
-    <button onclick="recordVideo()">🎥 ذخیره ویدیو خروجی</button>
-  </div>
-  <div id="container">
-    <div id="editors">
-      <textarea id="html" placeholder="کد HTML...">
-<h1>سلام دنیا!</h1></textarea>
-      <textarea id="css" placeholder="کد CSS...">
-body { background: lightblue; }</textarea>
-      <textarea id="js" placeholder="کد JavaScript...">
-console.log('JS فعال شد!')</textarea>
-      <textarea id="python" style="display:none;" placeholder="کد Python...">
-print('Hello from Python!')</textarea>
+  <header>
+    <div>
+      <label for="mode">🗂 حالت:</label>
+      <select id="mode" onchange="switchMode()">
+        <option value="multi">👨‍💻 سه زبانه (HTML/CSS/JS)</option>
+        <option value="html">🌐 HTML</option>
+        <option value="css">🎨 CSS</option>
+        <option value="js">⚙️ JS</option>
+        <option value="python">🐍 Python (شبیه‌سازی)</option>
+      </select>
     </div>
-    <div id="preview">
-      <iframe id="output"></iframe>
+    <div class="buttons">
+      <button onclick="runCode()">▶ اجرای کد</button>
+      <button onclick="downloadImage()">📷 دانلود عکس</button>
+      <button onclick="downloadVideo()">🎥 دانلود ویدیو</button>
     </div>
-  </div>
-  <script>
-    const output = document.getElementById('output');function runCode() {
-  const lang = document.getElementById('language').value;
-  if (lang === 'python') {
-    const pyCode = document.getElementById('python').value;
-    output.srcdoc = `<pre style='color:lime;'>${pyCode.replace(/</g, '&lt;')}</pre>`;
-  } else {
-    const html = document.getElementById('html').value;
-    const css = document.getElementById('css').value;
-    const js = document.getElementById('js').value;
-    const code = `
-      <style>${css}</style>
-      ${html}
-      <script>${js}<\/script>
-    `;
-    output.srcdoc = code;
+  </header>  <div class="editor-container">
+    <div class="editor" id="editors">
+      <textarea id="html" placeholder="HTML بنویسید..."><h1>Hello</h1></textarea>
+      <textarea id="css" placeholder="CSS بنویسید...">h1 { color: red; }</textarea>
+      <textarea id="js" placeholder="JS بنویسید...">console.log('Hi')</textarea>
+      <textarea id="python" placeholder="کد پایتون..." style="display:none;">print("سلام دنیا")</textarea>
+    </div>
+    <iframe id="preview"></iframe>
+  </div>  <script>
+    function switchMode() {
+      const mode = document.getElementById('mode').value;
+      const html = document.getElementById('html');
+      const css = document.getElementById('css');
+      const js = document.getElementById('js');
+      const py = document.getElementById('python');
+
+      html.style.display = css.style.display = js.style.display = py.style.display = 'none';
+
+      if (mode === 'multi') {
+        html.style.display = css.style.display = js.style.display = 'block';
+      } else if (mode === 'html') {
+        html.style.display = 'block';
+      } else if (mode === 'css') {
+        css.style.display = 'block';
+      } else if (mode === 'js') {
+        js.style.display = 'block';
+      } else if (mode === 'python') {
+        py.style.display = 'block';
+      }
+    }
+
+    function runCode() {
+      const mode = document.getElementById('mode').value;
+      const iframe = document.getElementById('preview');
+      const html = document.getElementById('html').value;
+      const css = document.getElementById('css').value;
+      const js = document.getElementById('js').value;
+      const py = document.getElementById('python').value;
+
+      if (mode === 'python') {
+        iframe.srcdoc = `<html><body><pre style='color:green;'>${py.replaceAll('<', '&lt;')}</pre></body></html>`;return;
   }
+
+  const content = `
+    <html>
+      <head><style>${mode === 'multi' || mode === 'css' ? css : ''}</style></head>
+      <body>
+        ${mode === 'multi' || mode === 'html' ? html : ''}
+        <script>${mode === 'multi' || mode === 'js' ? js : ''}<\/script>
+      </body>
+    </html>
+  `;
+  iframe.srcdoc = content;
 }
 
-function downloadScreenshot() {
-  html2canvas(output.contentDocument.body).then(canvas => {
+function downloadImage() {
+  html2canvas(document.getElementById('preview')).then(canvas => {
     const link = document.createElement('a');
     link.download = 'output.png';
     link.href = canvas.toDataURL();
@@ -113,30 +146,29 @@ function downloadScreenshot() {
   });
 }
 
-function recordVideo() {
-  const stream = output.contentWindow.document.body.captureStream(30);
+function downloadVideo() {
+  const preview = document.getElementById('preview');
+  const stream = preview.contentWindow.document.body.captureStream();
   const recorder = new MediaRecorder(stream);
   const chunks = [];
+
   recorder.ondataavailable = e => chunks.push(e.data);
   recorder.onstop = () => {
     const blob = new Blob(chunks, { type: 'video/webm' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'output.webm';
-    link.click();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'output.webm';
+    a.click();
   };
+
   recorder.start();
-  setTimeout(() => recorder.stop(), 90000); // 90 ثانیه ضبط
+  setTimeout(() => recorder.stop(), 5000); // 5 ثانیه فیلم ضبط شود
 }
 
-document.getElementById('language').addEventListener('change', (e) => {
-  const show = e.target.value;
-  ['html','css','js','python'].forEach(id => {
-    document.getElementById(id).style.display = show === id ? 'block' : (show === 'python' ? (id === 'python' ? 'block' : 'none') : (id === 'python' ? 'none' : 'block'));
-  });
-});
+window.onload = runCode;
 
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </body>
 </html>
