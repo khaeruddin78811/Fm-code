@@ -1,116 +1,119 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code Editor with Export</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>کد ادیتور با خروجی</title>
   <style>
     body {
+      margin: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      font-family: sans-serif;
-      background: #1e1e1e;
+      height: 100vh;
+      background-color: #1e1e1e;
       color: white;
-    }
-    textarea {
-      width: 90%;
-      height: 200px;
-      margin: 10px;
-      background: #2d2d2d;
-      color: white;
-      border: none;
-      padding: 10px;
       font-family: monospace;
     }
-    iframe {
-      width: 90%;
-      height: 300px;
-      margin: 20px 0;
-      border: 2px solid #555;
-      background: white;
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      background-color: #333;
     }
-    button {
-      margin: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
+    .top-bar button {
+      background-color: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin-left: 0.5rem;
       cursor: pointer;
+      border-radius: 0.5rem;
     }
-    input[type="number"] {
-      margin: 5px;
-      width: 80px;
+    .editor-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    textarea {
+      flex: 1;
+      padding: 1rem;
+      background-color: #111;
+      color: white;
+      border: none;
+      resize: none;
+      outline: none;
+    }
+    iframe {
+      flex: 1;
+      border: none;
+      background: white;
     }
   </style>
 </head>
 <body>
-  <h1>کدنویس آنلاین + خروجی</h1>
-  <textarea id="code" placeholder="کدت رو اینجا بنویس...">
-<!DOCTYPE html>
+  <div class="top-bar">
+    <span>🖥️ Code Editor</span>
+    <div>
+      <input id="durationInput" type="number" min="1" max="90" value="30" style="width: 60px; padding: 3px;"> ثانیه
+      <button onclick="captureScreenshot()">📷 عکس خروجی</button>
+      <button onclick="recordOutput()">🎥 ویدیو خروجی</button>
+    </div>
+  </div>
+  <div class="editor-container">
+    <textarea id="code" oninput="updatePreview()"><!DOCTYPE html>
 <html>
+  <head>
+    <style>
+      body {
+        background: #000;
+        color: #0f0;
+      }
+    </style>
+  </head>
   <body>
-    <h1>Hello World</h1>
+    <h1>Hello, world!</h1>
     <audio controls autoplay>
       <source src="your-audio.mp3" type="audio/mpeg">
     </audio>
   </body>
 </html>
-  </textarea>
-  <br />
-  <button onclick="runCode()">اجرای کد ▶️</button>
-  <button onclick="captureScreenshot()">📷 عکس خروجی</button>
-  <label for="duration">⏱ زمان ویدیو (ثانیه):</label>
-  <input type="number" id="duration" min="1" max="90" value="30">
-  <button onclick="recordVideo()">🎥 ضبط ویدیو خروجی</button>
-  <iframe id="output"></iframe>  <script>
-    const iframe = document.getElementById("output");
+</textarea>
+    <iframe id="preview"></iframe>
+  </div>  <script>
+    function updatePreview() {
+      const iframe = document.getElementById('preview');
+      const code = document.getElementById('code').value;
+      iframe.srcdoc = code;
+    }
+    updatePreview();
 
-    function runCode() {
-      const code = document.getElementById("code").value;
-      const doc = iframe.contentDocument || iframe.contentWindow.document;
-      doc.open();
-      doc.write(code);
-      doc.close();
+    async function captureScreenshot() {
+      const iframe = document.getElementById('preview');
+      const canvas = await html2canvas(iframe.contentDocument.body);
+      const link = document.createElement('a');
+      link.download = 'screenshot.png';
+      link.href = canvas.toDataURL();
+      link.click();
     }
 
-    function captureScreenshot() {
-      html2canvas(iframe.contentDocument.body).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'screenshot.png';
-        link.href = canvas.toDataURL();
-        link.click();
-      });
-    }
-
-    function recordVideo() {
-      const duration = Math.min(Number(document.getElementById('duration').value), 90);
-      const iframeWindow = iframe.contentWindow;
-      const stream = iframeWindow.document.body.captureStream();
-
-      const audio = iframeWindow.document.querySelector('audio');
-      if (audio && audio.captureStream) {
-        const audioStream = audio.captureStream();
-        const combined = new MediaStream([...stream.getTracks(), ...audioStream.getTracks()]);
-        startRecording(combined, duration);
-      } else {
-        startRecording(stream, duration);
-      }
-    }
-
-    function startRecording(stream, duration) {
-      const mediaRecorder = new MediaRecorder(stream);
+    async function recordOutput() {
+      const iframe = document.getElementById('preview');
+      const stream = iframe.contentWindow.document.querySelector('audio')?.captureStream?.() || iframe.contentWindow.document.body.captureStream?.();
+      if (!stream) return alert("مرورگر شما ضبط را پشتیبانی نمی‌کند");
+      const recorder = new MediaRecorder(stream);
       const chunks = [];
-
-      mediaRecorder.ondataavailable = e => chunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "video/webm" });
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = e => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
-        a.download = "recording.webm";
+        a.download = 'recording.webm';
         a.click();
       };
-
-      mediaRecorder.start();
-      setTimeout(() => mediaRecorder.stop(), duration * 1000);
+      recorder.start();
+      const duration = Math.min(parseInt(document.getElementById('durationInput').value || '30'), 90);
+      setTimeout(() => recorder.stop(), duration * 1000);
     }
   </script>  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script></body>
 </html>
