@@ -2,173 +2,184 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web Code Editor</title>
+  <title>کدنویسی تعاملی</title>
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #1e1e1e;
-      color: #fff;
-    }
-    header {
-      background: #333;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .editor-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      height: 90vh;
-    }
-    .editor {
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
-    }
-    textarea {
-      flex: 1;
-      margin: 5px 0;
-      background: #2d2d2d;
-      color: #00ff90;
-      border: none;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 14px;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: 4px solid #ff4444;
-      background: #fff;
-    }
-    .buttons {
-      margin-top: 5px;
-      display: flex;
-      gap: 5px;
-    }
-    button {
-      padding: 6px 10px;
-      background: #0077cc;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-    select {
-      padding: 5px;
-      background: #444;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-    }
+    :root {
+      --bg-light: #f4f4f4;
+      --bg-dark: #121212;
+      --editor-bg: #1e1e1e;
+      --text-light: #fff;
+      --text-dark: #000;
+      --accent: #00c896;
+    }body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.toolbar {
+  background: #222;
+  color: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.theme-toggle {
+  cursor: pointer;
+  padding: 5px 10px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 5px;
+}
+
+.editor-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal {
+  background: #111;
+  color: #0f0;
+  padding: 10px;
+  font-family: monospace;
+  border-bottom: 2px solid red;
+  height: 150px;
+  overflow-y: auto;
+}
+
+.code-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--editor-bg);
+  padding: 10px;
+}
+
+.code-input {
+  flex: 1;
+  background: #1e1e1e;
+  color: #fff;
+  border: none;
+  resize: none;
+  padding: 10px;
+  font-size: 14px;
+  font-family: 'Courier New', Courier, monospace;
+  border-radius: 10px;
+}
+
+iframe {
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  background: #fff;
+  height: 300px;
+  width: 100%;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.buttons button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--accent);
+  color: white;
+}
+
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <label for="mode">🗂 حالت:</label>
-      <select id="mode" onchange="switchMode()">
-        <option value="multi">👨‍💻 سه زبانه (HTML/CSS/JS)</option>
-        <option value="html">🌐 HTML</option>
-        <option value="css">🎨 CSS</option>
-        <option value="js">⚙️ JS</option>
-        <option value="python">🐍 Python (شبیه‌سازی)</option>
-      </select>
+  <div class="container">
+    <div class="toolbar">
+      <span>💻 محیط کدنویسی تعاملی</span>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 حالت شب/روز</button>
+    </div><div class="editor-wrapper">
+  <div class="terminal" id="terminal">💡 خروجی کد را اینجا ببینید...</div>
+
+  <div class="code-section">
+    <textarea id="codeInput" class="code-input" placeholder="اینجا کد HTML/CSS/JS بنویس...">
+
+<!DOCTYPE html><html>
+  <body>
+    <h1>Hello, world!</h1>
+  </body>
+</html>
+        </textarea><div class="buttons">
+      <button onclick="runCode()">▶️ اجرای کد</button>
+      <button onclick="downloadImage()">📷 عکس</button>
+      <button onclick="downloadVideo()">🎥 ویدیو</button>
     </div>
-    <div class="buttons">
-      <button onclick="runCode()">▶ اجرای کد</button>
-      <button onclick="downloadImage()">📷 دانلود عکس</button>
-      <button onclick="downloadVideo()">🎥 دانلود ویدیو</button>
-    </div>
-  </header>  <div class="editor-container">
-    <div class="editor" id="editors">
-      <textarea id="html" placeholder="HTML بنویسید..."><h1>Hello</h1></textarea>
-      <textarea id="css" placeholder="CSS بنویسید...">h1 { color: red; }</textarea>
-      <textarea id="js" placeholder="JS بنویسید...">console.log('Hi')</textarea>
-      <textarea id="python" placeholder="کد پایتون..." style="display:none;">print("سلام دنیا")</textarea>
-    </div>
-    <iframe id="preview"></iframe>
+
+    <iframe id="outputFrame"></iframe>
+  </div>
+</div>
+
   </div>  <script>
-    function switchMode() {
-      const mode = document.getElementById('mode').value;
-      const html = document.getElementById('html');
-      const css = document.getElementById('css');
-      const js = document.getElementById('js');
-      const py = document.getElementById('python');
+    const outputFrame = document.getElementById("outputFrame");
+    const terminal = document.getElementById("terminal");
 
-      html.style.display = css.style.display = js.style.display = py.style.display = 'none';
+    function runCode() {
+      const code = document.getElementById("codeInput").value;
+      outputFrame.srcdoc = code;
+      terminal.innerText = "✅ کد اجرا شد.";
+    }
 
-      if (mode === 'multi') {
-        html.style.display = css.style.display = js.style.display = 'block';
-      } else if (mode === 'html') {
-        html.style.display = 'block';
-      } else if (mode === 'css') {
-        css.style.display = 'block';
-      } else if (mode === 'js') {
-        js.style.display = 'block';
-      } else if (mode === 'python') {
-        py.style.display = 'block';
+    function toggleTheme() {
+      const root = document.documentElement;
+      const isLight = getComputedStyle(root).getPropertyValue("--bg-light").trim() === "#f4f4f4";
+      if (isLight) {
+        root.style.setProperty("--bg-light", "#121212");
+        root.style.setProperty("--text-dark", "#fff");
+        root.style.setProperty("--editor-bg", "#1e1e1e");
+      } else {
+        root.style.setProperty("--bg-light", "#f4f4f4");
+        root.style.setProperty("--text-dark", "#000");
+        root.style.setProperty("--editor-bg", "#1e1e1e");
       }
     }
 
-    function runCode() {
-      const mode = document.getElementById('mode').value;
-      const iframe = document.getElementById('preview');
-      const html = document.getElementById('html').value;
-      const css = document.getElementById('css').value;
-      const js = document.getElementById('js').value;
-      const py = document.getElementById('python').value;
+    function downloadImage() {
+      html2canvas(outputFrame.contentDocument.body).then(canvas => {
+        const a = document.createElement("a");
+        a.download = "output.png";
+        a.href = canvas.toDataURL();
+        a.click();
+      });
+    }
 
-      if (mode === 'python') {
-        iframe.srcdoc = `<html><body><pre style='color:green;'>${py.replaceAll('<', '&lt;')}</pre></body></html>`;return;
-  }
-
-  const content = `
-    <html>
-      <head><style>${mode === 'multi' || mode === 'css' ? css : ''}</style></head>
-      <body>
-        ${mode === 'multi' || mode === 'html' ? html : ''}
-        <script>${mode === 'multi' || mode === 'js' ? js : ''}<\/script>
-      </body>
-    </html>
-  `;
-  iframe.srcdoc = content;
-}
-
-function downloadImage() {
-  html2canvas(document.getElementById('preview')).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'output.png';
-    link.href = canvas.toDataURL();
-    link.click();
-  });
-}
-
-function downloadVideo() {
-  const preview = document.getElementById('preview');
-  const stream = preview.contentWindow.document.body.captureStream();
-  const recorder = new MediaRecorder(stream);
-  const chunks = [];
-
-  recorder.ondataavailable = e => chunks.push(e.data);
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'output.webm';
-    a.click();
-  };
-
-  recorder.start();
-  setTimeout(() => recorder.stop(), 5000); // 5 ثانیه فیلم ضبط شود
-}
-
-window.onload = runCode;
-
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-</body>
+    function downloadVideo() {
+      const stream = outputFrame.contentWindow.document.body.captureStream();
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'output.webm';
+        a.click();
+      };
+      recorder.start();
+      setTimeout(() => recorder.stop(), 3000);
+    }
+  </script>  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script></body>
 </html>
