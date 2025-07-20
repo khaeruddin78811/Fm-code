@@ -2,176 +2,141 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>کدنویس زنده</title>
+  <title>Web Code Runner</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
+      margin: 0;
       font-family: sans-serif;
-      background-color: #0e0e0e;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
+      background: #111;
+      color: white;
     }
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #1e1e1e;
+      background: #222;
       padding: 10px;
+      text-align: center;
+      font-size: 1.2em;
+      border-bottom: 4px solid red;
     }
-    .lang-select {
-      background: #2c2c2c;
-      border: none;
-      color: white;
-      padding: 5px 10px;
+    #container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100vh;
     }
-    .controls button {
-      margin-left: 10px;
-      padding: 5px 10px;
-      background: #3498db;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .editor-container {
-      display: flex;
-      flex-direction: column;
-      height: 60vh;
-    }
-    .editor {
-      flex: 1;
-      display: none;
-      resize: none;
+    #editors, #preview {
       padding: 10px;
-      background: #1d1d1d;
-      color: #00ff90;
+      overflow: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+      background: #222;
+      color: white;
       border: none;
+      resize: vertical;
+      padding: 8px;
       font-family: monospace;
-      font-size: 14px;
-      overflow: auto;
-    }
-    .editor.active {
-      display: block;
-    }
-    .output {
-      flex: 1;
-      border-top: 4px solid red;
-      background: white;
-      color: black;
-      padding: 10px;
-      overflow: auto;
     }
     iframe {
       width: 100%;
       height: 100%;
-      border: none;
+      background: white;
+      border: 2px solid #555;
     }
-    canvas {
-      display: none;
+    select, button {
+      margin: 5px;
+      padding: 10px;
+      background: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .buttons {
+      text-align: center;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <select id="language" class="lang-select">
+  <header>🖥️ محیط اجرای کد آنلاین</header>
+  <div class="buttons">
+    <select id="language">
       <option value="html">HTML</option>
+      <option value="python">Python</option>
       <option value="css">CSS</option>
       <option value="js">JavaScript</option>
-      <option value="python">Python</option>
     </select>
-    <div class="controls">
-      <button onclick="runCode()">▶ اجرا</button>
-      <button onclick="captureImage()">📸 عکس</button>
-      <button onclick="startRecording()">🎥 ضبط</button>
-      <button onclick="stopRecording()">🛑 توقف</button>
-      <a id="downloadLink" style="display: none;" download="video.mp4">⬇️ دانلود ویدیو</a>
+    <button onclick="runCode()">▶️ اجرای کد</button>
+    <button onclick="downloadScreenshot()">📸 ذخیره عکس خروجی</button>
+    <button onclick="recordVideo()">🎥 ذخیره ویدیو خروجی</button>
+  </div>
+  <div id="container">
+    <div id="editors">
+      <textarea id="html" placeholder="کد HTML...">
+<h1>سلام دنیا!</h1></textarea>
+      <textarea id="css" placeholder="کد CSS...">
+body { background: lightblue; }</textarea>
+      <textarea id="js" placeholder="کد JavaScript...">
+console.log('JS فعال شد!')</textarea>
+      <textarea id="python" style="display:none;" placeholder="کد Python...">
+print('Hello from Python!')</textarea>
     </div>
-  </header>  <div class="editor-container">
-    <textarea id="html" class="editor active" placeholder="کد HTML بنویس...">
-<!-- مثال -->
-<h1>سلام دنیا</h1>
-    </textarea>
-    <textarea id="css" class="editor" placeholder="کد CSS بنویس..."></textarea>
-    <textarea id="js" class="editor" placeholder="کد JavaScript بنویس..."></textarea>
-    <textarea id="python" class="editor" placeholder="کد Python بنویس..."></textarea>
-  </div>  <div class="output" id="output">
-    <iframe id="iframe"></iframe>
-  </div><canvas id="canvas"></canvas>
+    <div id="preview">
+      <iframe id="output"></iframe>
+    </div>
+  </div>
+  <script>
+    const output = document.getElementById('output');function runCode() {
+  const lang = document.getElementById('language').value;
+  if (lang === 'python') {
+    const pyCode = document.getElementById('python').value;
+    output.srcdoc = `<pre style='color:lime;'>${pyCode.replace(/</g, '&lt;')}</pre>`;
+  } else {
+    const html = document.getElementById('html').value;
+    const css = document.getElementById('css').value;
+    const js = document.getElementById('js').value;
+    const code = `
+      <style>${css}</style>
+      ${html}
+      <script>${js}<\/script>
+    `;
+    output.srcdoc = code;
+  }
+}
 
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/pyodide@0.23.4/pyodide.js"></script>  <script>
-    let stream, recorder, chunks = [];
-    let pyodideReady = false;
-    
-    language.onchange = () => {
-      document.querySelectorAll('.editor').forEach(el => el.classList.remove('active'));
-      document.getElementById(language.value).classList.add('active');
-    }
-
-    async function runCode() {
-      const lang = language.value;
-      const iframe = document.getElementById("iframe");
-      const output = document.getElementById("output");
-
-      if (lang === "python") {
-        if (!pyodideReady) {
-          self.pyodide = await loadPyodide();
-          pyodideReady = true;
-        }
-        const code = document.getElementById("python").value;
-        const result = await pyodide.runPythonAsync(code);
-        output.innerHTML = `<pre>${result}</pre>`;} else {
-    const html = document.getElementById("html").value;
-    const css = document.getElementById("css").value;
-    const js = document.getElementById("js").value;
-    const source = `
-
-<!DOCTYPE html><html>
-<head>
-<style>${css}</style>
-</head>
-<body>
-${html}
-<script>${js}</script>
-</body>
-</html>`;
-        const blob = new Blob([source], { type: 'text/html' });
-        iframe.src = URL.createObjectURL(blob);
-      }
-    }function captureImage() {
-  html2canvas(document.getElementById("output")).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "output.png";
+function downloadScreenshot() {
+  html2canvas(output.contentDocument.body).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'output.png';
     link.href = canvas.toDataURL();
     link.click();
   });
 }
 
-function startRecording() {
-  const iframe = document.getElementById("iframe");
-  stream = iframe.contentWindow.document.body.captureStream();
-  recorder = new MediaRecorder(stream);
+function recordVideo() {
+  const stream = output.contentWindow.document.body.captureStream(30);
+  const recorder = new MediaRecorder(stream);
+  const chunks = [];
   recorder.ondataavailable = e => chunks.push(e.data);
   recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: 'video/mp4' });
-    const url = URL.createObjectURL(blob);
-    const link = document.getElementById("downloadLink");
-    link.href = url;
-    link.style.display = 'inline';
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'output.webm';
+    link.click();
   };
   recorder.start();
+  setTimeout(() => recorder.stop(), 90000); // 90 ثانیه ضبط
 }
 
-function stopRecording() {
-  recorder.stop();
-}
+document.getElementById('language').addEventListener('change', (e) => {
+  const show = e.target.value;
+  ['html','css','js','python'].forEach(id => {
+    document.getElementById(id).style.display = show === id ? 'block' : (show === 'python' ? (id === 'python' ? 'block' : 'none') : (id === 'python' ? 'none' : 'block'));
+  });
+});
 
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
