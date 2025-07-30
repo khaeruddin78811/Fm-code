@@ -1,4 +1,4 @@
-// بروزرسانی زنده
+// بروزرسانی پیش‌نمایش
 function updatePreview() {
     const html = document.getElementById('html').value;
     const css = document.getElementById('css').value;
@@ -16,16 +16,49 @@ function updatePreview() {
     iframe.close();
 }
 
-// رویداد برای بروزرسانی زنده
-document.getElementById('html').addEventListener('input', updatePreview);
-document.getElementById('css').addEventListener('input', updatePreview);
-document.getElementById('js').addEventListener('input', updatePreview);
+// دکمه اجرا
+document.getElementById('run-btn').addEventListener('click', updatePreview);
+
+// انتخاب زبان
+const languageSelect = document.getElementById('language-select');
+const htmlInput = document.getElementById('html');
+const cssInput = document.getElementById('css');
+const jsInput = document.getElementById('js');
+
+languageSelect.addEventListener('change', () => {
+    const selected = languageSelect.value;
+    htmlInput.classList.remove('active');
+    cssInput.classList.remove('active');
+    jsInput.classList.remove('active');
+
+    if (selected === 'all') {
+        htmlInput.classList.add('active');
+        cssInput.classList.add('active');
+        jsInput.classList.add('active');
+    } else if (selected === 'html') {
+        htmlInput.classList.add('active');
+    } else if (selected === 'css') {
+        cssInput.classList.add('active');
+    } else if (selected === 'js') {
+        jsInput.classList.add('active');
+    }
+});
+
+// تغییر تم
+document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    document.body.classList.toggle('dark-theme');
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.innerHTML = document.body.classList.contains('dark-theme')
+        ? '<i class="fas fa-sun"></i> حالت روز'
+        : '<i class="fas fa-moon"></i> حالت شب';
+});
 
 // پاک کردن کد
 document.getElementById('clear-btn').addEventListener('click', () => {
-    document.getElementById('html').value = '';
-    document.getElementById('css').value = '';
-    document.getElementById('js').value = '';
+    htmlInput.value = '';
+    cssInput.value = '';
+    jsInput.value = '';
     updatePreview();
 });
 
@@ -41,9 +74,9 @@ document.getElementById('download-image-btn').addEventListener('click', () => {
 
 // دانلود کد
 document.getElementById('download-code-btn').addEventListener('click', () => {
-    const htmlContent = document.getElementById('html').value;
-    const cssContent = document.getElementById('css').value;
-    const jsContent = document.getElementById('js').value;
+    const htmlContent = htmlInput.value;
+    const cssContent = cssInput.value;
+    const jsContent = jsInput.value;
 
     const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
     const cssBlob = new Blob([cssContent], { type: 'text/css' });
@@ -64,3 +97,9 @@ document.getElementById('download-code-btn').addEventListener('click', () => {
     jsLink.download = 'script.js';
     jsLink.click();
 });
+
+// تنظیم پیش‌فرض
+htmlInput.classList.add('active');
+cssInput.classList.add('active');
+jsInput.classList.add('active');
+updatePreview();
