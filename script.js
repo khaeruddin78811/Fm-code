@@ -1,58 +1,66 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+// بروزرسانی زنده
+function updatePreview() {
+    const html = document.getElementById('html').value;
+    const css = document.getElementById('css').value;
+    const js = document.getElementById('js').value;
+    const iframe = document.getElementById('preview').contentWindow.document;
+    iframe.open();
+    iframe.write(`
+        <html>
+            <head>
+                <style>${css}</style>
+            </head>
+            <body>${html}<script>${js}</script></body>
+        </html>
+    `);
+    iframe.close();
 }
 
-.editor-container {
-    display: flex;
-    height: 80vh;
-}
+// رویداد برای بروزرسانی زنده
+document.getElementById('html').addEventListener('input', updatePreview);
+document.getElementById('css').addEventListener('input', updatePreview);
+document.getElementById('js').addEventListener('input', updatePreview);
 
-.code-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
+// پاک کردن کد
+document.getElementById('clear-btn').addEventListener('click', () => {
+    document.getElementById('html').value = '';
+    document.getElementById('css').value = '';
+    document.getElementById('js').value = '';
+    updatePreview();
+});
 
-textarea {
-    flex: 1;
-    padding: 10px;
-    font-family: 'Courier New', monospace;
-    border: 1px solid #ccc;
-    resize: none;
-}
+// دانلود خروجی به عنوان تصویر
+document.getElementById('download-image-btn').addEventListener('click', () => {
+    html2canvas(document.getElementById('preview')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'output.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+});
 
-.preview-area {
-    flex: 1;
-    border: 1px solid #ccc;
-}
+// دانلود کد
+document.getElementById('download-code-btn').addEventListener('click', () => {
+    const htmlContent = document.getElementById('html').value;
+    const cssContent = document.getElementById('css').value;
+    const jsContent = document.getElementById('js').value;
 
-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
+    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+    const cssBlob = new Blob([cssContent], { type: 'text/css' });
+    const jsBlob = new Blob([jsContent], { type: 'text/javascript' });
 
-.controls {
-    padding: 10px;
-    text-align: center;
-}
+    const htmlLink = document.createElement('a');
+    htmlLink.href = URL.createObjectURL(htmlBlob);
+    htmlLink.download = 'index.html';
+    htmlLink.click();
 
-button {
-    margin: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-}
+    const cssLink = document.createElement('a');
+    cssLink.href = URL.createObjectURL(cssBlob);
+    cssLink.download = 'style.css';
+    cssLink.click();
 
-@media (max-width: 768px) {
-    .editor-container {
-        flex-direction: column;
-    }
-    .code-area {
-        flex-direction: row;
-    }
-    textarea {
-        height: 200px;
-    }
-}
+    const jsLink = document.createElement('a');
+    jsLink.href = URL.createObjectURL(jsBlob);
+    jsLink.download = 'script.js';
+    jsLink.click();
+});
