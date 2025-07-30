@@ -46,10 +46,21 @@ body.dark-theme {
 
 .code-area {
     flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+}
+
+.language-section {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    padding: 10px;
+}
+
+label {
+    font-weight: bold;
+    color: #007acc;
 }
 
 .code-input {
@@ -57,7 +68,6 @@ body.dark-theme {
     flex: 1;
     padding: 10px;
     font-family: 'Fira Code', monospace;
-ල
     font-size: 14px;
     border: 1px solid #ccc;
     resize: none;
@@ -91,9 +101,9 @@ iframe {
         flex-direction: column;
     }
     .code-area {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
     .code-input {
-        height: 200px;
+        height: 150px;
     }
 }
