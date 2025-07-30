@@ -1,26 +1,36 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ویرایشگر کد زنده</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="light-theme">
+    <div class="toolbar">
+        <button id="run-btn"><i class="fas fa-play"></i> اجرا</button>
+        <button id="theme-toggle"><i class="fas fa-moon"></i> حالت شب</button>
+        <select id="language-select">
+            <option value="all">همه زبان‌ها</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="js">JavaScript</option>
+        </select>
+        <button id="clear-btn"><i class="fas fa-trash"></i> پاک کردن</button>
+        <button id="download-code-btn"><i class="fas fa-download"></i> دانلود کد</button>
+        <button id="download-image-btn"><i class="fas fa-image"></i> دانلود تصویر</button>
+    </div>
     <div class="editor-container">
         <div class="code-area">
-            <textarea id="html" placeholder="HTML"></textarea>
-            <textarea id="css" placeholder="CSS"></textarea>
-            <textarea id="js" placeholder="JavaScript"></textarea>
+            <textarea id="html" class="code-input" placeholder="HTML"></textarea>
+            <textarea id="css" class="code-input" placeholder="CSS"></textarea>
+            <textarea id="js" class="code-input" placeholder="JavaScript"></textarea>
         </div>
         <div class="preview-area">
             <iframe id="preview" sandbox="allow-scripts"></iframe>
         </div>
-    </div>
-    <div class="controls">
-        <button id="clear-btn">پاک کردن کد</button>
-        <button id="download-code-btn">دانلود کد</button>
-        <button id="download-image-btn">دانلود خروجی به عنوان تصویر</button>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="script.js"></script>
