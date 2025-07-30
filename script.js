@@ -5,40 +5,59 @@ const iframe = document.getElementById("preview");
 const languageSelect = document.getElementById("language-select");
 
 function updatePreview() {
-  const html = htmlInput.value;
-  const css = cssInput.value;
-  const js = jsInput.value;
+  try {
+    const html = htmlInput.value || "";
+    const css = cssInput.value || "";
+    const js = jsInput.value || "";
 
-  const isDark = document.body.classList.contains("dark-theme");
-  const bgColor = isDark ? "#1e1e1e" : "#ffffff";
-  const textColor = isDark ? "#d4d4d4" : "#000000";
+    const isDark = document.body.classList.contains("dark-theme");
+    const bgColor = isDark ? "#1e1e1e" : "#ffffff";
+    const textColor = isDark ? "#d4d4d4" : "#000000";
 
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(`
-    <html>
-      <head>
-        <style>
-          body { background: ${bgColor}; color: ${textColor}; }
-          ${css}
-        </style>
-      </head>
-      <body>
-        ${html}
-        <script>${js}<\/script>
-      </body>
-    </html>
-  `);
-  doc.close();
+    // استفاده از srcdoc برای جلوگیری از مشکلات امنیتی
+    iframe.srcdoc = `
+      <html>
+        <head>
+          <style>
+            body { background: ${bgColor}; color: ${textColor}; margin: 0; padding: 0; }
+            ${css}
+          </style>
+        </head>
+        <body>
+          ${html}
+          <script>${js}<\/script>
+        </body>
+      </html>
+    `;
+    console.log("پیش‌نمایش به‌روز شد با srcdoc");
+  } catch (e) {
+    console.error("خطا در بروزرسانی پیش‌نمایش:", e);
+    iframe.srcdoc = "<html><body><p>خطا در بارگذاری پیش‌نمایش</p></body></html>";
+  }
 }
 
-document.getElementById("run-btn").addEventListener("click", updatePreview);
+document.getElementById("run-btn").addEventListener("click", () => {
+  console.log("دکمه اجرا کلیک شد");
+  updatePreview();
+});
 
 languageSelect.addEventListener("change", () => {
   const value = languageSelect.value;
-  htmlInput.parentElement.style.display = (value === "all" || value === "html") ? "flex" : "none";
-  cssInput.parentElement.style.display = (value === "all" || value === "css") ? "flex" : "none";
-  jsInput.parentElement.style.display = (value === "all" || value === "js") ? "flex" : "none";
+  htmlInput.classList.remove("active");
+  cssInput.classList.remove("active");
+  jsInput.classList.remove("active");
+
+  if (value === "all") {
+    htmlInput.classList.add("active");
+    cssInput.classList.add("active");
+    jsInput.classList.add("active");
+  } else if (value === "html") {
+    htmlInput.classList.add("active");
+  } else if (value === "css") {
+    cssInput.classList.add("active");
+  } else if (value === "js") {
+    jsInput.classList.add("active");
+  }
   updatePreview();
 });
 
@@ -56,31 +75,41 @@ document.getElementById("clear-btn").addEventListener("click", () => {
 });
 
 document.getElementById("download-image-btn").addEventListener("click", () => {
-  html2canvas(iframe.contentWindow.document.body).then(canvas => {
-    const link = document.createElement("a");
-    link.href = canvas.toDataURL("image/png");
-    link.download = "output.png";
-    link.click();
-  });
+  try {
+    html2canvas(iframe.contentWindow.document.body, { scale: 2 }).then(canvas => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "output.png";
+      link.click();
+    });
+  } catch (e) {
+    console.error("خطا در دانلود تصویر:", e);
+  }
 });
 
 document.getElementById("download-video-btn").addEventListener("click", () => {
-  const stream = iframe.contentWindow.document.body.captureStream();
-  const recorder = new MediaRecorder(stream);
-  const chunks = [];
+  try {
+    const stream = iframe.contentWindow.document.body.captureStream();
+    if (!stream) throw new Error("خطا در دسترسی به جریان ویدیو");
+    const recorder = new MediaRecorder(stream);
+    const chunks = [];
 
-  recorder.ondataavailable = e => chunks.push(e.data);
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: "video/webm" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "output.webm";
-    link.click();
-  };
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: "video/webm" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "output.webm";
+      link.click();
+      URL.revokeObjectURL(url);
+    };
 
-  recorder.start();
-  setTimeout(() => recorder.stop(), 3000); // 3 ثانیه ضبط می‌کند
+    recorder.start();
+    setTimeout(() => recorder.stop(), 5000); // 5 ثانیه ضبط
+  } catch (e) {
+    console.error("خطا در ضبط ویدیو:", e);
+  }
 });
 
 // حالت پیش‌فرض
