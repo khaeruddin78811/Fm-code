@@ -1,83 +1,28 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>پیش‌نمایش و کد</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background-color: #000;
-      font-family: sans-serif;
-    }
-
-    .preview {
-      flex: 1;
-      background-color: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 2px solid red;
-    }
-
-    .editor {
-      flex: 1;
-      background-color: #000;
-      color: #0f0;
-      padding: 10px;
-      overflow-y: auto;
-      font-family: monospace;
-      direction: ltr;
-    }
-
-    .heart {
-      position: relative;
-      width: 200px;
-      height: 180px;
-      animation: beat 1s infinite alternate;
-    }
-
-    .heart:before,
-    .heart:after {
-      content: "";
-      position: absolute;
-      width: 100px;
-      height: 160px;
-      background: #ff0033;
-      border-radius: 100px 100px 0 0;
-      top: 0;
-      box-shadow: 0 0 30px #ff0055;
-    }
-
-    .heart:before {
-      left: 100px;
-      transform: rotate(-45deg);
-      transform-origin: left bottom;
-    }
-
-    .heart:after {
-      left: 0;
-      transform: rotate(45deg);
-      transform-origin: right bottom;
-    }
-
-    @keyframes beat {
-      0%   { transform: scale(1); }
-      100% { transform: scale(1.2); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویرایشگر کد زنده</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="preview">
-    <div class="heart"></div>
-  </div>
-
-  <div class="editor">
-    <!-- اینجا می‌توان کدها را به صورت ثابت یا پویا نمایش داد -->
-    &lt;div class="heart"&gt;&lt;/div&gt;
-  </div>
+    <div class="editor-container">
+        <div class="code-area">
+            <textarea id="html" placeholder="HTML"></textarea>
+            <textarea id="css" placeholder="CSS"></textarea>
+            <textarea id="js" placeholder="JavaScript"></textarea>
+        </div>
+        <div class="preview-area">
+            <iframe id="preview" sandbox="allow-scripts"></iframe>
+        </div>
+    </div>
+    <div class="controls">
+        <button id="clear-btn">پاک کردن کد</button>
+        <button id="download-code-btn">دانلود کد</button>
+        <button id="download-image-btn">دانلود خروجی به عنوان تصویر</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
